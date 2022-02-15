@@ -2,7 +2,8 @@
 
 const int stepsPerRevolution = 100;
 
-Stepper stepmotor(stepsPerRevolution, 8, 9, 10, 11);
+Stepper xStepper(stepsPerRevolution, 8, 9, 10, 11);
+Stepper yStepper(stepsPerRevolution, 12, 13, 14, 15);
 
 const int stepsPerMillimeter = 1;
 
@@ -49,7 +50,7 @@ void goToCoords(float x, float y) {
   posY = y;
 }
 
-void printArray(const bool image[][], int rows, int cols) {
+void printArray(int rows, int cols, int image[3][3]) {
   resetPos();
   for (int i = 0; i < rows; i++) {
     for(int j = 0; j < cols; j++) {
@@ -65,8 +66,8 @@ void printArray(const bool image[][], int rows, int cols) {
 void setup() {
   // put your setup code here, to run once:
   resetPos();
-  bool[3][3] img = {{0,1,0},{1,1,1},{0,1,0}};
-  printArray(img, 3, 3);
+  int img[3][3] = {{0,1,0},{1,1,1},{0,1,0}};
+  printArray(3, 3, img);
 }
 
 void loop() {
