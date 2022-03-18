@@ -1,0 +1,18 @@
+EN  - Kapacitor
+GND - Kapacitor, TFT GND, Joy GND
+5V  - Joy 5V
+3V3 - TFT LED, TFT VCC
+2   - TFT DC
+4   - TFT RESET
+13  - 
+12  - 
+14  - yStep
+27  - yDir
+26  - xStep
+25  - xDir
+33  - VRX
+32  - VRY
+35  - SW
+15  - TFT CS
+18  - TFT SCK
+23  - TFT MOSI (SDI)
