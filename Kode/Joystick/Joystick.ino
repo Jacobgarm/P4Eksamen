@@ -1,70 +1,51 @@
-#include <Arduino_FreeRTOS.h>
-
-#define VRX_PIN  A8 // Arduino pin connected to VRX pin
-#define VRY_PIN  A9 // Arduino pin connected to VRY pin
-
-//Pins for steppermotors
-#define xStepPin 30
-#define xDirPin 31
-
-#define yStepPin 32
-#define yDirPin 33
-
-const int stepsPerRevolution = 200;
-
-float xSpeed = 5;
-float ySpeed = 5;
-bool xForward = true;
-
-void TaskXStep(void *pvParameters);
-void TaskYStep(void *pvParameters);
-void TaskInput(void *pvParameters);
-//Pen state variable
-bool penIsDown; 
+int c = 9;
+int state = LOW;
 
 void setup() {
-  pinMode(xStepPin, OUTPUT);
-  pinMode(yStepPin, OUTPUT);
-  pinMode(xDirPin, OUTPUT);
-  pinMode(yDirPin, OUTPUT);
+  // put your setup code here, to run once:
   Serial.begin(9600);
-  xTaskCreate(TaskXStep, "XStep", 128, NULL, 2, NULL);
-  xTaskCreate(TaskYStep, "YStep", 128, NULL, 1, NULL);
-  xTaskCreate(TaskInput, "Input", 128, NULL, 1, NULL);
+  pinMode(33, INPUT);
+  pinMode(35, INPUT);
+  pinMode(25, OUTPUT);
+  pinMode(26, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(27, OUTPUT);
+  pinMode(14, OUTPUT);
 }
 
-void TaskInput(void *pvParameters) {
-  for (;;) {
-     //xSpeed = map(analogRead(VRX_PIN), 0, 1024, -10, 10);
-     //ySpeed = map(analogRead(VRY_PIN), 0, 1024, -10, 10);
-     vTaskDelay(10.0/portTICK_PERIOD_MS);
-  }  
-}
-
-void TaskXStep(void *pvParameters) {
-  for(;;){
-    if (xSpeed < 0 && xForward) {
-      xForward = false;
-      digitalWrite(xDirPin, LOW);
+void loop() {
+  // put your main code here, to run repeatedly:
+  long spdx = analogRead(33);
+  long spdy = analogRead(35);
+  Serial.print(spdx);
+  Serial.print(" ");
+  Serial.println(spdy);
+  if (spdx < 2000)
+    digitalWrite(25,LOW);
+  else if (spdx > 3000)
+    digitalWrite(25,HIGH);
+  if (spdy < 2000)
+    digitalWrite(27,LOW);
+  else if (spdy > 3000)
+    digitalWrite(27,HIGH);
+  for (int i = 0; i <10; i++) {
+    delay(1);
+    if (abs(spdx - 2300) > 600) {
+      digitalWrite(26,LOW);
+      Serial.println("A");
     }
-    else if (xSpeed > 0 && !xForward) {
-      xForward = true;
-      digitalWrite(xDirPin, HIGH);
-    }
-    Serial.println(xSpeed);
-    for (int k = 0; k < 100; k++) {
-      digitalWrite(xStepPin, HIGH);
-      vTaskDelay(1.1 /portTICK_PERIOD_MS);
-      digitalWrite(xStepPin, LOW);
-      vTaskDelay(1.1 /portTICK_PERIOD_MS );  
-    }
-  }  
+    if (abs(spdy - 2300) > 600)
+      digitalWrite(14,LOW);
+    digitalWrite(LED_BUILTIN,LOW);
+    delay(1);
+    if (abs(spdx - 2300) > 600)
+      digitalWrite(26,HIGH);
+    if (abs(spdy - 2300) > 600)
+      digitalWrite(14,HIGH);
+    digitalWrite(LED_BUILTIN,HIGH);
+  }
+  //delayMicroseconds((int)(1000/abs(spd)));
 }
 
-void TaskYStep(void *pvParameters) {
-  for (;;) {
-    vTaskDelay(10.0 / portTICK_PERIOD_MS);
-  }  
-}
-
-void loop() {}
+//100 steps = 2 cm
+//300 steps = 6 cm

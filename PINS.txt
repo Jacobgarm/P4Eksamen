@@ -4,15 +4,15 @@ GND - Kapacitor, TFT GND, Joy GND
 3V3 - TFT LED, TFT VCC
 2   - TFT DC
 4   - TFT RESET
-13  - 
-12  - 
+5   - SD CS
 14  - yStep
-27  - yDir
-26  - xStep
-25  - xDir
-33  - VRX
-32  - VRY
-35  - SW
 15  - TFT CS
-18  - TFT SCK
-23  - TFT MOSI (SDI)
+18  - TFT & SD SCK (CLK)
+19  - SD MISO
+23  - TFT & SD MOSI (SDI)
+25  - xDir
+26  - xStep
+27  - yDir
+32  - VRY
+33  - VRX
+35  - SW

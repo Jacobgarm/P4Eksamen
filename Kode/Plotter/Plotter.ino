@@ -1,5 +1,6 @@
 #include <SD.h>
 #include <SPI.h>
+//#include <Servo.h>
 
 //Standard A4 paper size
 #define A4width 297
@@ -10,11 +11,11 @@
 #define A3height 297
 
 //Pins for steppermotors
-#define xStepPin 30
-#define xDirPin 31
+#define xStepPin 26
+#define xDirPin 25
 
-#define yStepPin 30
-#define yDirPin 31
+#define yStepPin 14
+#define yDirPin 27
 
 //Pins for stopping buttons
 #define xStopButtonPin 30
@@ -25,7 +26,7 @@ const int stepsPerRevolution = 200;
 //All distances are in millimeters
 const int stepsPerMillimeter = 1;
 
-//The horizontal and vertical seperation of the dots when printing an image
+//The horizontal and vertical seperation of the dots when printing an image in mm
 const float printDotDistance = 4;
 
 // Vaiables for the current position
@@ -38,6 +39,7 @@ bool penIsDown;
 void resetPos() {
   penUp();
   // Move pen to (0,0)
+  return;
   while (!digitalRead(xStopButtonPin)) {
     ;
   }
@@ -49,21 +51,48 @@ void resetPos() {
 }
 
 void penUp() {
-  if (penDown) {
+  if (penIsDown) {
     // Move pen up
     penIsDown = false;
   }
 }
 
 void penDown() {
-  if (!penDown) {
+  if (!penIsDown) {
     // Move pen down
     penIsDown = true;
   }
 }
 
 void goToCoords(float x, float y) {
-  // Move pen to coordinates
+  // Move pen to coordinates in mm
+  if (x < posX)
+    digitalWrite(xDirPin, LOW);
+  else
+    digitalWrite(xDirPin, HIGH);
+  if (y < posY)
+    digitalWrite(yDirPin, LOW);
+  else
+    digitalWrite(yDirPin, HIGH);
+  int xSteps = abs(x - posX) * stepsPerMillimeter;
+  int ySteps = abs(y - posY) * stepsPerMillimeter;
+  while (xSteps > 0 && ySteps > 0) {
+      if (xSteps > 0)
+        digitalWrite(xStepPin, HIGH);
+      if (ySteps > 0)
+        digitalWrite(yStepPin, HIGH);
+      delayMicroseconds(700);
+      if (ySteps > 0) {
+        digitalWrite(yStepPin, LOW);
+        xSteps--;
+      }
+      if (ySteps > 0){
+        digitalWrite(yStepPin, LOW);
+        ySteps--;
+      }
+      delayMicroseconds(700);
+  }
+  
   posX = x;
   posY = y;
 }
@@ -77,16 +106,8 @@ void printArray(int rows, int cols, int image[]) {
         Serial.print("□");
         penDown();
         penUp();
-        digitalWrite(xDirPin, HIGH);
       } else {
         Serial.print("■");
-        digitalWrite(xDirPin, LOW);
-      }
-      for (int k = 0; k < stepsPerRevolution; k++) {
-        digitalWrite(xStepPin, HIGH);
-        delayMicroseconds(700);
-        digitalWrite(xStepPin, LOW);
-        delayMicroseconds(700);  
       }
     }
     Serial.println();
@@ -102,6 +123,7 @@ void setup() {
   pinMode(yDirPin, OUTPUT);
   pinMode(xStopButtonPin, INPUT);
   pinMode(yStopButtonPin, INPUT);
+  return;
   Serial.println("Starting sd");
   if (!SD.begin(53)) {
     Serial.println("initialization failed!");
@@ -124,5 +146,5 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  goToCoords(random(1,10),random(1,10));
 }
