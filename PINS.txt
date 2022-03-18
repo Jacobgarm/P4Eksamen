@@ -16,3 +16,4 @@ GND - Kapacitor, TFT GND, Joy GND
 32  - VRY
 33  - VRX
 35  - SW
+34  - PWM til Servo
