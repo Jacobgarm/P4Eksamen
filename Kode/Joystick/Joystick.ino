@@ -4,8 +4,8 @@ int state = LOW;
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
-  pinMode(33, INPUT);
-  pinMode(35, INPUT);
+  pinMode(33, INPUT_PULLUP);
+  pinMode(32, INPUT_PULL);
   pinMode(25, OUTPUT);
   pinMode(26, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -16,7 +16,7 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   long spdx = analogRead(33);
-  long spdy = analogRead(35);
+  long spdy = analogRead(32);
   Serial.print(spdx);
   Serial.print(" ");
   Serial.println(spdy);
@@ -32,7 +32,7 @@ void loop() {
     delay(1);
     if (abs(spdx - 2300) > 600) {
       digitalWrite(26,LOW);
-      Serial.println("A");
+      //Serial.println("A");
     }
     if (abs(spdy - 2300) > 600)
       digitalWrite(14,LOW);
