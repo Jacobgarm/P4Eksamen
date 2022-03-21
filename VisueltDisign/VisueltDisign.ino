@@ -8,11 +8,11 @@ TFT_eSPI tft = TFT_eSPI();
 
 //Variabler
   //Joystick ting
-  int Abe = 0;
+  int JoystickTimer = 0;
   int JoyStickXPin=33;
   //Tæller hvilken der er markederet
   int Marked = 1;
-  int LaengdeAfNavne=3;
+  String Navne[] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Sluk for skærm", ""};
 
 void setup() {
   Serial.begin(9600);
@@ -25,36 +25,42 @@ void setup() {
   pinMode(35, INPUT);
 
   //Start skærm
-  String Navne[] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "4.", ""};
-  StartSkarm(Navne, Marked);
+  
+  StartSkarm(Navne, Marked,"Main");
 }
 
 void loop() {
-  //
-  String Navne[] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "4.", ""};
   while (analogRead(JoyStickXPin) == 0||analogRead(JoyStickXPin)==4095) {
-    if (Abe == 50) {
-      if(Marked!=LaengdeAfNavne){
+    if (JoystickTimer == 50) {
+      if(Navne[Marked+1]!=""){
       Marked++;
         }
-      StartSkarm(Navne, Marked);
-      Abe = 0;
-    }else if(Abe==-50){
+      StartSkarm(Navne, Marked,"Main");
+      JoystickTimer = 0;
+    }else if(JoystickTimer==-50){
       if(Marked!=0){
       Marked--;}
-      StartSkarm(Navne,Marked);
-      Abe=0;
+      StartSkarm(Navne,Marked,"Main");
+      JoystickTimer=0;
     }
+    JoystickTimer=0;
     delay(10);
-    Abe=Abe+(analogRead(JoyStickXPin) == 0 ? 1 : -1);
+    JoystickTimer=JoystickTimer+(analogRead(JoyStickXPin) == 0 ? 1 : -1);
   }
-  Serial.println(analogRead(JoyStickXPin));
 }
 
-void StartSkarm(String Navne[], int Marked) {
+
+
+void StartSkarm(String Navne[], int Marked, String Titel) {
   tft.fillScreen(TFT_BLACK);
+
+  tft.setFreeFont(&Lato_Heavy_21);
+  tft.fillRect(0,0,320,30,TFT_ORANGE);
+  tft.fillRect(0,30,320,5,TFT_BLACK);
+  tft.drawString(Titel,21,5);
+  
   for (int i = 0; Navne[i] != ""; i++) {
-    int I = i * 35;
+    int I = i * 35+35;
 
     tft.fillRect(0, I, 320, 10, TFT_ORANGE);
 
