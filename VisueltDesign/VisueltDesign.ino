@@ -8,12 +8,15 @@
 
 TFT_eSPI tft = TFT_eSPI();
 
-
 //Variabler
+
+const int tftChipSelectPin = 15;
+const int SDChipSelectPin = 15;
+
 //Joystick ting
 int JoystickTicker = 0;
-int JoyStickXPin = 33;
-int JoyStickZPin = 26;
+const int JoyStickXPin = 33;
+const int JoyStickZPin = 26;
 int JoystickTimerVardi = 35;
 //Tæller hvilken der er markederet
 int Marked = 0;
@@ -23,8 +26,9 @@ String Titel = "Main";
 void setup() {
   Serial.begin(9600);
 
-  digitalWrite(15, HIGH); // TFT screen chip select
-  digitalWrite( 5, HIGH); // SD chip select
+  // Begge CS pins HIGH så de ikke begge kan kommunikeres med
+  digitalWrite(15, tftChipSelectPin); // TFT screen chip select
+  digitalWrite( 5, SDChipSelectPin); // SD chip select
   
   //Starter for skærmen, samt sætter den til sort
   tft.init();
@@ -40,16 +44,18 @@ void setup() {
   pinMode(JoyStickZPin, INPUT_PULLUP);
 
   //Start skærm
-  StartSkarm();
+  TegnSkarm();
 }
+
 int lastUpdated = 0;
+
 void loop(){
   //Laver start opsætning
   Marked = StyringAfSkarm();
   Serial.print("Z: ");
   Serial.println(digitalRead(JoyStickZPin));
-  //Serial.println(Navne[0]);
-  
+  /
+  // Minion animation
   if (Titel == "Main" && lastUpdated +100 < millis()) {
     lastUpdated = millis();
     int state = millis() / 101;
@@ -76,14 +82,14 @@ int StyringAfSkarm() {
       if (Navne[Marked + 1] != "") {
         Marked++;
       }
-      StartSkarm();
+      TegnSkarm();
       JoystickTicker = 0;
     }
     else if (JoystickTicker == -JoystickTimerVardi) {
       if (Marked != 0) {
         Marked--;
       }
-      StartSkarm();
+      TegnSkarm();
       JoystickTicker = 0;
     }
     delay(10);
@@ -111,11 +117,11 @@ int enterMenu(String menu) {
   } else if (menu == "Tilbage") {
       
   }
-  StartSkarm();
+  TegnSkarm();
 }
 
 //Denne method er til at skrive Valgmulighederne på skærmen
-void StartSkarm() {
+void TegnSkarm() {
   //Laver hele skærmen sort
   tft.fillScreen(TFT_BLACK);
 
