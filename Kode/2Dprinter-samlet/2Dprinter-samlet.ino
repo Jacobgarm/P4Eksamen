@@ -65,6 +65,9 @@ String selectedFile;
 double penXPos;
 double penYPos;
 bool penIsDown;
+String filNavn;
+
+//Start på funktioner------------------------------------------------------------------------------------------------------------------------
 
 //Printer movement functions
 
@@ -278,14 +281,41 @@ void displayMenu() {
   }  
 }
 
-void displayConfirm() {
+void displayConfirm(bool valg) {
+  //Laver hele skærmen sort
+  tft.fillScreen(TFT_BLACK);
+
+  //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
+  tft.setTextColor(TFT_BLACK, TFT_ORANGE);
+  tft.setFreeFont(&Lato_Heavy_21);
+  tft.fillRect(0, 0, 320, 30, TFT_ORANGE);
+  //tft.fillRect(0, 30, 320, 5, TFT_BLACK);
+  tft.drawString("Vil du forsaette med at printe "+filNavn, 10, 5);
+
+
+  //Laver firekanten til true
+  tft.fillRect(60, 50, 200, 50, TFT_ORANGE);
+  //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
+  tft.setFreeFont(valg == true ? &Lato_Heavy_21 : &Lato_Heavy_20);
+  tft.drawString("Ja",150,65);
+
+  //Laver firekanten til false
+  tft.fillRect(60, 150, 200, 50, TFT_ORANGE);
+  //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
+  tft.setFreeFont(valg == false ? &Lato_Heavy_21 : &Lato_Heavy_20);
+  tft.drawString("Nej",150,165);
+  
+
+  //LAVER MINION HER
+
+
   
 }
 
 void displayProgress(float progress) {
   
 }
-
+//Start på void setup og loop------------------------------------------------------------------------------------------------------------------------
 void setup() {
   // Start Serial
   Serial.begin(9600);
