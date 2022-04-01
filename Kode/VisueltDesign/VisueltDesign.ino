@@ -137,7 +137,7 @@ void TegnSkarm() {
 
   int first = 0;
   if (Marked > 9)
-    first = Marked -9;
+    first = Marked - 9;
   
   //Laver et loop, som kører alle mulige valg igennem
   for (int i = 0; Navne[i+first] != ""; i++) {
