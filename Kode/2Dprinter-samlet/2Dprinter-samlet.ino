@@ -3,8 +3,8 @@
 #include <SD.h>
 #include <FS.h>
 #include <JPEGDecoder.h>
-#include "FontIkkeFed.h"
-#include "FontFed.h"
+#include "dejavuserif.h"
+#include "dejavuserifbold.h"
 
 #define sgn(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
 
@@ -16,7 +16,7 @@
 #define A3width 420
 #define A3height 297
 
-//Size values;
+//Size values
 #define stepsPerMM 5 //Hvor mange steps der skal til for at bevæge en millimeter
 #define printDotDistance 4 //Hvor mannge millimeter der er mellem hver prik der printes
 
@@ -89,32 +89,39 @@ void penDown() {
   }
 }
 
-void goToCoords(int x, int y) {}
-
 void calibratePen() {}
 
-void moveDir(const float len, float dir) {
-  //Lav dir til radianer
-  dir = dir * PI / 180;
+void moveCoords(const float xLen, const float yLen) {
+  if (xLen == 0 && yLen == 0)
+    return;
+  // Set DIR-pins alt efter om det er positiv eller negativ retning
+  digitalWrite(xDirPin, xLen > 0 ? xPosDir : !xPosDir);
+  digitalWrite(yDirPin, yLen > 0 ? yPosDir : !yPosDir);
+
+  // Beregn antal steps der skal tages
+  const int xSteps = (int)(abs(xLen) * stepsPerMM);
+  const int ySteps = (int)(abs(yLen) * stepsPerMM);
   
-  float xLen = abs(len * cos(dir));
-  float yLen = len * sin(dir);
-  digitalWrite(xDirPin, cos(dir) > 0 ? xPosDir : !xPosDir);
-  digitalWrite(yDirPin, sin(dir) > 0 ? yPosDir : !yPosDir); 
-  int xSteps = (int)(xLen * stepsPerMM);
-  int ySteps = (int)(yLen * stepsPerMM);
   int xRemaining = xSteps;
   int yRemaining = ySteps;
-  int totalTime = max(xSteps, ySteps) * 1400;
-  int xInterval = totalTime / xSteps / 2;
-  int yInterval = totalTime / ySteps / 2;
+
+  // Den samlede mængde tid er bestemt af den akse der skal flytte sig længest
+  const int totalTime = max(xSteps, ySteps) * 1400;
+  
+  const int xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
+  const int yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
+  
   unsigned long xTimer = 0;
   unsigned long yTimer = 0;
+  
   int xState = HIGH;
   int yState = HIGH;
   digitalWrite(xStepPin,xState);
   digitalWrite(yStepPin,yState);
+
+  // Loop indtil begge akser ikke mangler flere steps
   while (xRemaining || yRemaining) {
+    // Hvis der er steps tilbage på en akse, og den forløbne tid er over intervallet, skiftes STEP-pinnens tilstand.
     if (xRemaining && micros() > xTimer + xInterval) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
@@ -130,6 +137,22 @@ void moveDir(const float len, float dir) {
         yRemaining--;
     }
   }
+  penXPos += xLen;
+  penYPos += yLen;
+}
+
+void goToCoords(int x, int y) {
+  moveCoords(x - penXPos, y - penYPos);  
+}
+
+void moveDir(const float len, float dir) {
+  //Lav dir til radianer
+  dir = dir * PI / 180;
+  
+  float xLen = len * cos(dir);
+  float yLen = len * sin(dir);
+
+  moveCoords(xLen, yLen);
 }
 
 void drawTurtle(const char* filePath) {
@@ -142,6 +165,7 @@ void drawTurtle(const char* filePath) {
   String command = "";
   String value = "";
   bool readingCommand = true;
+  bool isComment = false;
   float heading = 0;
 
   unsigned long loopPos = 0;
@@ -204,7 +228,7 @@ void drawTurtle(const char* filePath) {
       command = "";
       value = "";
       readingCommand = true;
-      iscomment = false
+      isComment = false;
     } 
     // Hvis den nuværende linje er en kommentar, fortsæt
     else if (isComment)
@@ -246,7 +270,7 @@ void printImage(const char* filePath) {
   // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
   for (int i = 0; i < rows; i++) {
 
-    // Ved hver anden ræke går den baglæns for at minimere distancen.
+    // Ved hver anden række går den baglæns for at minimere distancen.
     bool even = i % 2 == 0;
     for(int j = even ? 0 : cols - 1; even ? (j < cols) : (j>=0) ; even ? (j++) : (j--)) {
       goToCoords(j*printDotDistance,i*printDotDistance);
@@ -333,7 +357,7 @@ void displayMenu() {
 
   //De næste par linjer laver topdelen af displayet, hvor den skriver tiltelen
   tft.setTextColor(TFT_BLACK, TFT_ORANGE);
-  tft.setFreeFont(&Lato_Heavy_21);
+  tft.setFreeFont(&DejaVu_Serif_16);
   tft.fillRect(0, 0, 320, 30, TFT_ORANGE);
   tft.fillRect(0, 30, 320, 5, TFT_BLACK);
   tft.drawString(screenName, 21, 5);
@@ -354,7 +378,7 @@ void displayMenu() {
     tft.fillRect(0, I, 320, 10, TFT_ORANGE);
 
     //Ændre fonten afhængig af om det er den marked, eller ikke er. HIvs det er så bliver den fed
-    tft.setFreeFont(i+first == marked ? &Lato_Heavy_21 : &Lato_Heavy_20);
+    tft.setFreeFont(i+first == marked ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
 
     //Hvis det også er den markedet, så lavers der også en cirkel ud foran
     if (marked == i+first) {
@@ -373,7 +397,7 @@ void displayConfirm(bool valg) {
 
   //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
   tft.setTextColor(TFT_BLACK, TFT_ORANGE);
-  tft.setFreeFont(&Lato_Heavy_21);
+  tft.setFreeFont(&DejaVu_Serif_16);
   tft.fillRect(0, 0, 320, 30, TFT_ORANGE);
   //tft.fillRect(0, 30, 320, 5, TFT_BLACK);
   tft.drawString("Vil du forsaette med at printe "+filNavn, 10, 5);
@@ -382,13 +406,13 @@ void displayConfirm(bool valg) {
   //Laver firekanten til true
   tft.fillRect(60, 50, 200, 50, TFT_ORANGE);
   //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == true ? &Lato_Heavy_21 : &Lato_Heavy_20);
+  tft.setFreeFont(valg == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Ja",150,65);
 
   //Laver firekanten til false
   tft.fillRect(60, 150, 200, 50, TFT_ORANGE);
   //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == false ? &Lato_Heavy_21 : &Lato_Heavy_20);
+  tft.setFreeFont(valg == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Nej",150,165);
   
 
