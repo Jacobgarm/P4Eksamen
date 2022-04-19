@@ -1,0 +1,16 @@
+move 40
+left 90
+move 30
+right 90
+move 20
+
+# Comment, for loop
+repeat 6
+left 140
+move 10
+wait 50
+endrepeat
+
+
+setdir 0
+move 10

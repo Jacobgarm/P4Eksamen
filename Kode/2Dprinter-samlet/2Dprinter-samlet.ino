@@ -93,7 +93,10 @@ void goToCoords(int x, int y) {}
 
 void calibratePen() {}
 
-void moveDir(const float len, const float dir) {
+void moveDir(const float len, float dir) {
+  //Lav dir til radianer
+  dir = dir * PI / 180;
+  
   float xLen = abs(len * cos(dir));
   float yLen = len * sin(dir);
   digitalWrite(xDirPin, cos(dir) > 0 ? xPosDir : !xPosDir);
@@ -130,53 +133,120 @@ void moveDir(const float len, const float dir) {
 }
 
 void drawTurtle(const char* filePath) {
+
+  //Læs filen
   File file = SD.open(filePath);
+
+  //Command indeholder den første del af linjen, der bestemmer hvilken funktion der skal udføres
+  // Value er den tilhørende værdi.
   String command = "";
   String value = "";
   bool readingCommand = true;
   float heading = 0;
+
+  unsigned long loopPos = 0;
+  int loopCount = 0;
   while (file.available()) {
+    
+    //Læs filen en char ad gangen
     char c = file.read();
+
+    //Hvis char er et linjeskift, så er kommandoen færdig og skal udføres
     if (c == '\n') {
-      float v = value.toFloat();
+      // Tom linje
+      if (command == "")
+        continue;
+
+      command.toLowerCase();
+      float v;
+      if (value == "")
+        v = 0;
+      else
+        v = value.toFloat();
+
+      // move kommando flytter turtle fremad efter dens nuværende retning
       if (command == "move")
         moveDir(v, heading);
+
+      // Drej turtle
       else if(command == "left")
         heading += v;
       else if (command == "right")
         heading -= v;
+      else if (command == "setdir")
+        heading = v;
+
+      // Vent i v millisekunder
       else if(command == "wait")
         delay(v);
+
+      // Flyt pennen op eller ned
       else if(command == "pendown")
         penDown();
       else if(command == "penup")
         penUp();
+
+      // Start et loop der gentager efterfølgende kode v gange
+      else if(command == "repeat") {
+        loopPos = file.position();  
+        loopCount = v;
+      } 
+
+      // Slut loopet. Hvis det ikke er udført v gange, så hop tilbage til starten af loopet
+      else if (command == "endrepeat") {
+        if (loopCount > 0) {
+          loopCount--;
+          file.seek(loopPos);  
+        }
+      }
       else
         Serial.println("Unknown command: " + command);
       command = "";
       value = "";
       readingCommand = true;
-    } else if (c == ' ') {
+      iscomment = false
+    } 
+    // Hvis den nuværende linje er en kommentar, fortsæt
+    else if (isComment)
+      continue;
+
+    // Et mellemrum adskiller kommandoen og værdien
+    else if (c == ' ')
       readingCommand = false;
-    } else if (readingCommand) {
+
+    // Et hashtag indikerer starten af en kommentar
+    else if (c == '#')
+      isComment = true;
+
+    // Ellers, tilføj charen til enten den nuværende kommando eller værdi
+    else if (readingCommand)
       command = command + String(c);
-    } else {
+    else
       value = value + String(c);
-    }
+    
   }
   file.close();
 }
 
 void printImage(const char* filePath) {
+  // Læs filen med billedet
   File file = SD.open(filePath);
+
+  // De første to bytes indeholder antallet af kolonner og rækker
   int cols = file.read();
   int rows = file.read();
   int len = cols*rows;
+
+  // Et array til pixels fyldes med resten af filens bytes
   int img[len];
   for (int i = 0; i< len; i++)
     img[i] = (int)file.read();
   file.close();
+
+  // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
   for (int i = 0; i < rows; i++) {
+
+    // Ved hver anden ræke går den baglæns for at minimere distancen.
     bool even = i % 2 == 0;
     for(int j = even ? 0 : cols - 1; even ? (j < cols) : (j>=0) ; even ? (j++) : (j--)) {
       goToCoords(j*printDotDistance,i*printDotDistance);
@@ -198,24 +268,36 @@ void joystickControl() {
   int yDir = yPosDir;
   digitalWrite(xDirPin, xDir);
   digitalWrite(yDirPin, yDir);
+  
+  // Start begge timere ved nul
   unsigned long xTimer = 0;
   unsigned long yTimer = 0;
+
+  // Start begge STEP-pins på HIGH
   int xState = HIGH;
   int yState = HIGH;
   digitalWrite(xStepPin,xState);
   digitalWrite(yStepPin,yState);
+  
   while (true) {
+    //Læs joystickværdier
     int jx = analogRead(joystickXPin) - joystickXMid;
     int jy = analogRead(joystickYPin) - joystickYMid;
     int jz = digitalRead(joystickZPin);
+
+    //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)
         penUp();
       else
         penDown();  
     }
+
+    // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
     if ((jx * jx + jy * jy) < joystickDeadzone)
       continue;
+
+    // Hvis joysticket har ændret retning, skal steppermotoren vende
     if ((jx < 0 && xDir == xPosDir) || (jx > 0 && xDir != xPosDir)) {
       xDir = !xDir;
       digitalWrite(xDirPin, xDir);
@@ -224,8 +306,12 @@ void joystickControl() {
       yDir = !yDir;
       digitalWrite(yDirPin, yDir);
     }
+
+    //Beregn stepintervallet ud fra joystickets position, jo større værdi jo mindre interval
     int xInterval = (int)(-0.341796875 * abs(jx) + 1400);
     int yInterval = (int)(-0.341796875 * abs(jy) + 1400);
+
+    // Hvis den forløbne tid er større end intervallet, step
     if (micros() > xTimer + xInterval) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
