@@ -16,9 +16,9 @@ GND - TFT GND, Joy GND
 
 27  - yDir
 14  - yStep
-1
-32  - VRY
 
+32  - VRY
 33  - VRX
 35  - SW (joystick Z)
+
 12  - PWM til Servo
