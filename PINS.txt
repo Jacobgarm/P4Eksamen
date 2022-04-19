@@ -5,15 +5,21 @@ GND - Kapacitor, TFT GND, Joy GND
 2   - TFT DC
 4   - TFT RESET
 5   - SD CS
-14  - yStep
+
 15  - TFT CS
 18  - TFT & SD SCK (CLK)
 19  - SD MISO
 23  - TFT & SD MOSI (SDI)
+
+
 25  - xDir
 26  - xStep
+
 27  - yDir
-32  - VRY
+14  - yStep
+1
+32  - VRYxo22åu+øo
+
 33  - VRX
 35  - SW
-34  - PWM til Servo
+12  - PWM til Servo
