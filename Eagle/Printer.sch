@@ -267,40 +267,6 @@
 </library>
 <library name="tftdisplay">
 <packages>
-<package name="FOOT_TFT">
-<rectangle x1="-10.16" y1="-3.81" x2="11.43" y2="5.08" layer="21"/>
-<pad name="P$1" x="-7.62" y="3.81" drill="0.6" shape="square"/>
-<pad name="P$2" x="1.27" y="3.81" drill="0.6" shape="square"/>
-<pad name="P$3" x="-3.81" y="0" drill="0.6" shape="square"/>
-<pad name="P$4" x="3.81" y="2.54" drill="0.6" shape="square"/>
-<pad name="P$5" x="8.89" y="0" drill="0.6" shape="square"/>
-<pad name="P$6" x="2.54" y="-1.27" drill="0.6" shape="square"/>
-<text x="-5.08" y="-1.27" size="1.27" layer="21">Cool</text>
-<text x="-3.81" y="1.27" size="1.27" layer="21">Cool</text>
-<text x="-5.08" y="2.54" size="1.27" layer="21">Cool</text>
-<text x="-10.16" y="0" size="1.27" layer="21">Cool</text>
-<text x="-10.16" y="3.81" size="1.27" layer="21">Cool</text>
-<text x="-7.62" y="2.54" size="1.27" layer="21">Cool</text>
-<text x="-5.08" y="2.54" size="1.27" layer="21">Cool</text>
-<text x="-1.27" y="1.27" size="1.27" layer="21">Cool</text>
-<text x="8.89" y="-1.27" size="1.27" layer="21">Cool</text>
-<text x="15.24" y="2.54" size="1.27" layer="21">Cool</text>
-<text x="-16.51" y="1.27" size="1.27" layer="21">Cool</text>
-<text x="0" y="6.35" size="1.27" layer="21">Cool</text>
-<text x="-1.27" y="-7.62" size="1.27" layer="21">Cool</text>
-<pad name="P$7" x="-6.35" y="1.27" drill="0.6" shape="square"/>
-<pad name="P$8" x="-3.81" y="3.81" drill="0.6" shape="square"/>
-<pad name="P$9" x="-6.35" y="-1.27" drill="0.6" shape="square"/>
-<pad name="P$10" x="-1.27" y="2.54" drill="0.6" shape="square"/>
-<pad name="P$11" x="-2.54" y="-2.54" drill="0.6" shape="square"/>
-<pad name="P$12" x="6.35" y="-2.54" drill="0.6" shape="square"/>
-<pad name="P$13" x="7.62" y="2.54" drill="0.6" shape="square"/>
-<pad name="P$14" x="10.16" y="3.81" drill="0.6" shape="square"/>
-<pad name="P$15" x="5.08" y="0" drill="0.6" shape="square"/>
-<pad name="P$16" x="1.27" y="1.27" drill="0.6" shape="square"/>
-<pad name="P$17" x="0" y="-2.54" drill="0.6" shape="square"/>
-<pad name="P$18" x="-1.27" y="0" drill="0.6" shape="square"/>
-</package>
 </packages>
 <symbols>
 <symbol name="SYM_TFT">
@@ -315,7 +281,7 @@
 <pin name="T_CLK" x="-78.74" y="5.08" length="middle"/>
 <pin name="SDO" x="-78.74" y="2.54" length="middle"/>
 <pin name="LED" x="-78.74" y="0" length="middle"/>
-<pin name="CDK" x="-78.74" y="-2.54" length="middle"/>
+<pin name="SCK" x="-78.74" y="-2.54" length="middle"/>
 <pin name="SDI" x="-78.74" y="-5.08" length="middle"/>
 <pin name="DC" x="-78.74" y="-7.62" length="middle"/>
 <pin name="RESET" x="-78.74" y="-10.16" length="middle"/>
@@ -336,27 +302,7 @@
 <gate name="G$1" symbol="SYM_TFT" x="43.18" y="2.54"/>
 </gates>
 <devices>
-<device name="" package="FOOT_TFT">
-<connects>
-<connect gate="G$1" pin="CDK" pad="P$1"/>
-<connect gate="G$1" pin="CS" pad="P$2"/>
-<connect gate="G$1" pin="DC" pad="P$3"/>
-<connect gate="G$1" pin="GND" pad="P$4"/>
-<connect gate="G$1" pin="LED" pad="P$5"/>
-<connect gate="G$1" pin="RESET" pad="P$6"/>
-<connect gate="G$1" pin="SDI" pad="P$7"/>
-<connect gate="G$1" pin="SDO" pad="P$8"/>
-<connect gate="G$1" pin="SD_CS" pad="P$9"/>
-<connect gate="G$1" pin="SD_MISO" pad="P$10"/>
-<connect gate="G$1" pin="SD_MOSI" pad="P$11"/>
-<connect gate="G$1" pin="SD_SCK" pad="P$12"/>
-<connect gate="G$1" pin="T_CD" pad="P$13"/>
-<connect gate="G$1" pin="T_CLK" pad="P$14"/>
-<connect gate="G$1" pin="T_D0" pad="P$15"/>
-<connect gate="G$1" pin="T_DIN" pad="P$16"/>
-<connect gate="G$1" pin="T_IRQ" pad="P$17"/>
-<connect gate="G$1" pin="VCC" pad="P$18"/>
-</connects>
+<device name="">
 <technologies>
 <technology name=""/>
 </technologies>
@@ -661,18 +607,19 @@ at 30/07/2012 17:45:58</description>
 </modules>
 <parts>
 <part name="U$1" library="ESP32-DEVKITC" deviceset="ESP32DEVKITC" device=""/>
-<part name="U$2" library="tftdisplay" deviceset="TFT" device=""/>
+<part name="TFT_DISPLAY" library="tftdisplay" deviceset="TFT" device=""/>
 <part name="U1" library="Texas Instruments_By_element14_Batch_1" deviceset="DRV8824PWPR" device=""/>
 </parts>
 <sheets>
 <sheet>
 <plain>
+<text x="-33.02" y="22.86" size="1.778" layer="91">: Display</text>
 </plain>
 <instances>
 <instance part="U$1" gate="G$1" x="53.34" y="35.56" smashed="yes" rot="R90">
 <attribute name="NAME" x="48.26" y="8.89" size="1.27" layer="95" rot="R180"/>
 </instance>
-<instance part="U$2" gate="G$1" x="190.5" y="33.02" smashed="yes"/>
+<instance part="TFT_DISPLAY" gate="G$1" x="-78.74" y="48.26" smashed="yes" rot="MR0"/>
 <instance part="U1" gate="A" x="81.28" y="-35.56" smashed="yes">
 <attribute name="NAME" x="75.9206" y="-3.5814" size="2.0828" layer="95" ratio="10" rot="SR0"/>
 <attribute name="VALUE" x="77.724" y="-76.1492" size="2.0828" layer="96" ratio="10" rot="SR0"/>
@@ -681,6 +628,121 @@ at 30/07/2012 17:45:58</description>
 <busses>
 </busses>
 <nets>
+<net name="GND" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="GND@38"/>
+<wire x1="35.56" y1="12.7" x2="22.86" y2="12.7" width="0.1524" layer="91"/>
+<label x="22.86" y="12.7" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="GND"/>
+<wire x1="0" y1="33.02" x2="5.08" y2="33.02" width="0.1524" layer="91"/>
+<label x="0" y="33.02" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="3.3V" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="3V3"/>
+<wire x1="71.12" y1="12.7" x2="76.2" y2="12.7" width="0.1524" layer="91"/>
+<label x="76.2" y="12.7" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="LED"/>
+<wire x1="0" y1="48.26" x2="5.08" y2="48.26" width="0.1524" layer="91"/>
+<label x="0" y="48.26" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="VCC"/>
+<wire x1="0" y1="30.48" x2="5.08" y2="30.48" width="0.1524" layer="91"/>
+<label x="0" y="30.48" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="5V" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="5V"/>
+<wire x1="71.12" y1="58.42" x2="78.74" y2="58.42" width="0.1524" layer="91"/>
+<label x="78.74" y="58.42" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="N$1" class="0">
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="DC"/>
+<wire x1="0" y1="40.64" x2="17.78" y2="40.64" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="IO2"/>
+<wire x1="17.78" y1="40.64" x2="17.78" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="17.78" y1="48.26" x2="35.56" y2="48.26" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$2" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="IO4"/>
+<wire x1="35.56" y1="43.18" x2="25.4" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="43.18" x2="25.4" y2="35.56" width="0.1524" layer="91"/>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="CS"/>
+<wire x1="25.4" y1="35.56" x2="0" y2="35.56" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="RESET"/>
+<wire x1="0" y1="38.1" x2="12.7" y2="38.1" width="0.1524" layer="91"/>
+<wire x1="12.7" y1="38.1" x2="12.7" y2="50.8" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="IO15"/>
+<wire x1="12.7" y1="50.8" x2="35.56" y2="50.8" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$4" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="IO18"/>
+<wire x1="35.56" y1="33.02" x2="10.16" y2="33.02" width="0.1524" layer="91"/>
+<wire x1="10.16" y1="33.02" x2="10.16" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SCK"/>
+<wire x1="10.16" y1="45.72" x2="0" y2="45.72" width="0.1524" layer="91"/>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SD_SCK"/>
+<wire x1="-76.2" y1="50.8" x2="-76.2" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="-76.2" y1="71.12" x2="10.16" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="10.16" y1="71.12" x2="10.16" y2="45.72" width="0.1524" layer="91"/>
+<junction x="10.16" y="45.72"/>
+</segment>
+</net>
+<net name="TFT" class="0">
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SD_MISO"/>
+<wire x1="-76.2" y1="48.26" x2="-83.82" y2="48.26" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="48.26" x2="-83.82" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="-83.82" y1="17.78" x2="5.08" y2="17.78" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="17.78" x2="5.08" y2="27.94" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="27.94" x2="25.4" y2="27.94" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="IO19"/>
+<wire x1="25.4" y1="27.94" x2="25.4" y2="30.48" width="0.1524" layer="91"/>
+<wire x1="25.4" y1="30.48" x2="35.56" y2="30.48" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$7" class="0">
+<segment>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SDI"/>
+<wire x1="0" y1="43.18" x2="20.32" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="20.32" y1="43.18" x2="20.32" y2="20.32" width="0.1524" layer="91"/>
+<pinref part="U$1" gate="G$1" pin="IO23"/>
+<wire x1="20.32" y1="20.32" x2="20.32" y2="15.24" width="0.1524" layer="91"/>
+<wire x1="20.32" y1="15.24" x2="35.56" y2="15.24" width="0.1524" layer="91"/>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SD_MOSI"/>
+<wire x1="-76.2" y1="45.72" x2="-81.28" y2="45.72" width="0.1524" layer="91"/>
+<wire x1="-81.28" y1="45.72" x2="-81.28" y2="20.32" width="0.1524" layer="91"/>
+<wire x1="-81.28" y1="20.32" x2="20.32" y2="20.32" width="0.1524" layer="91"/>
+<junction x="20.32" y="20.32"/>
+</segment>
+</net>
+<net name="N$9" class="0">
+<segment>
+<pinref part="U$1" gate="G$1" pin="IO5"/>
+<wire x1="35.56" y1="35.56" x2="30.48" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="30.48" y1="35.56" x2="30.48" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="30.48" y1="25.4" x2="-76.2" y2="25.4" width="0.1524" layer="91"/>
+<pinref part="TFT_DISPLAY" gate="G$1" pin="SD_CS"/>
+<wire x1="-76.2" y1="25.4" x2="-76.2" y2="43.18" width="0.1524" layer="91"/>
+</segment>
+</net>
 </nets>
 </sheet>
 </sheets>
