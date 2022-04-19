@@ -1,6 +1,5 @@
-EN  - Kapacitor
-GND - Kapacitor, TFT GND, Joy GND
-5V  - Joy 5V
+GND - TFT GND, Joy GND
+5V  - Joy 5V, RST x hbro, RST y hbro, SLP x hbro, SLP y hbro
 3V3 - TFT LED, TFT VCC
 2   - TFT DC
 4   - TFT RESET
