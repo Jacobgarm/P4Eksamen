@@ -73,7 +73,7 @@
 <pin name="T_CLK" x="-78.74" y="5.08" length="middle"/>
 <pin name="SDO" x="-78.74" y="2.54" length="middle"/>
 <pin name="LED" x="-78.74" y="0" length="middle"/>
-<pin name="CDK" x="-78.74" y="-2.54" length="middle"/>
+<pin name="SCK" x="-78.74" y="-2.54" length="middle"/>
 <pin name="SDI" x="-78.74" y="-5.08" length="middle"/>
 <pin name="DC" x="-78.74" y="-7.62" length="middle"/>
 <pin name="RESET" x="-78.74" y="-10.16" length="middle"/>
