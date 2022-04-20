@@ -58,14 +58,16 @@ TFT_eSPI tft = TFT_eSPI();
 
 //State vars
 String screenName = "Hovedmenu";
-String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset", "Sluk for display"};
+String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
 String listNames[100] = mainMenuNames;
 int marked = 0;
+
 String selectedFile;
 double penXPos;
 double penYPos;
 bool penIsDown;
 String filNavn;
+
 
 //Start på funktioner------------------------------------------------------------------------------------------------------------------------
 
@@ -398,22 +400,22 @@ void displayConfirm(bool valg) {
   //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
   tft.setTextColor(TFT_BLACK, TFT_ORANGE);
   tft.setFreeFont(&DejaVu_Serif_16);
-  tft.fillRect(0, 0, 320, 30, TFT_ORANGE);
-  //tft.fillRect(0, 30, 320, 5, TFT_BLACK);
-  tft.drawString("Vil du forsaette med at printe "+filNavn, 10, 5);
+  tft.fillRect(0, 0, 320, 60, TFT_ORANGE);
+  tft.drawString("Vil du forsaette med at printe:", 10, 5);
+  tft.drawString(filNavn, 10, 21);
 
 
   //Laver firekanten til true
-  tft.fillRect(60, 50, 200, 50, TFT_ORANGE);
+  tft.fillRect(60, 80, 200, 50, TFT_ORANGE);
   //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
   tft.setFreeFont(valg == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
-  tft.drawString("Ja",150,65);
+  tft.drawString("Ja",150,95);
 
   //Laver firekanten til false
-  tft.fillRect(60, 150, 200, 50, TFT_ORANGE);
+  tft.fillRect(60, 180, 200, 50, TFT_ORANGE);
   //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
   tft.setFreeFont(valg == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
-  tft.drawString("Nej",150,165);
+  tft.drawString("Nej",150,195);
   
 
   //LAVER MINION HER
@@ -427,9 +429,11 @@ void displayProgress(float progress) {
 }
 //Start på void setup og loop------------------------------------------------------------------------------------------------------------------------
 void setup() {
+
   // Start Serial
   Serial.begin(9600);
 
+  
   // Pin Modes
   pinMode(xStepPin,OUTPUT);
   pinMode(xDirPin,OUTPUT);
@@ -445,6 +449,7 @@ void setup() {
   pinMode(joystickZPin, INPUT_PULLUP);
   pinMode(tftCSPin,OUTPUT);
   pinMode(sdCSPin,OUTPUT);
+  
 
   // Begge CS pins HIGH så de ikke begge kan kommunikeres med
   digitalWrite(tftCSPin, HIGH);
@@ -453,6 +458,7 @@ void setup() {
   //Starter for skærmen, samt sætter den til sort
   tft.init();
   tft.fillScreen(TFT_BLACK);
+  tft.setRotation(2);
 
   //Start SD-kortet
   if (!SD.begin()) {
@@ -460,12 +466,10 @@ void setup() {
     return;
   }
 
-  displayMenu();
-  
   drawTurtle("/test.turtle");
+  displayMenu();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
 }
