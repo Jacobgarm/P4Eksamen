@@ -213,13 +213,14 @@ void printImage(const String filePath) {
   for (int i = 0; i< len; i++)
     img[i] = (int)file.read();
   file.close();
-
+  int printed = 0;
   // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
   for (int i = 0; i < rows; i++) {
 
     // Ved hver anden række går den baglæns for at minimere distancen.
     bool even = i % 2 == 0;
     for(int j = even ? 0 : cols - 1; even ? (j < cols) : (j>=0) ; even ? (j++) : (j--)) {
+      displayProgress(int(float(printed)/len * 100));
       goToCoords(j*printDotDistance,i*printDotDistance);
       if (img[i*cols + j]) {
         Serial.print("□");
@@ -228,6 +229,7 @@ void printImage(const String filePath) {
       } else {
         Serial.print("■");
       }
+      printed++;
     }
     Serial.println();
   }
@@ -353,7 +355,7 @@ void displayMenu() {
   }  
 }
 
-void displayConfirm(bool valg) {
+void displayConfirm() {
   //Laver hele skærmen sort
   tft.fillScreen(TFT_BLACK);
 
@@ -362,19 +364,19 @@ void displayConfirm(bool valg) {
   tft.setFreeFont(&DejaVu_Serif_16);
   tft.fillRect(0, 0, 320, 60, TFT_ORANGE);
   tft.drawString("Vil du forsaette med at printe:", 10, 5);
-  tft.drawString(filNavn, 10, 21);
+  tft.drawString(selectedFile, 10, 21);
 
 
   //Laver firekanten til true
   tft.fillRect(60, 80, 200, 50, TFT_ORANGE);
   //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
+  tft.setFreeFont(confirmChoice == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Ja",150,95);
 
   //Laver firekanten til false
   tft.fillRect(60, 180, 200, 50, TFT_ORANGE);
   //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
+  tft.setFreeFont(confirmChoice == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Nej",150,195);
   
 
@@ -404,10 +406,15 @@ void enterMenu(String menuName) {
         continue;
       listNames[i] = file.name();
     }
-    marked = 0;
-    
   } else if (menuName == "Hovedmenu") {
     for (int i = 0; i < 100; i++)
       listNames [i] = mainMenuNames[i];
+    
   }
+  marked = 0;
+}
+
+void selectFile(String fileName) {
+  screenName = "Confirm";
+  confirmChoice = false;
 }

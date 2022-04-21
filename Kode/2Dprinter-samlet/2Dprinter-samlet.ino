@@ -65,12 +65,12 @@ String screenName = "Hovedmenu";
 String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
 String listNames[100] = {};
 int marked = 0;
-
 String selectedFile;
+bool confirmChoice = true;
+
 float penXPos;
 float penYPos;
 bool penIsDown = false;
-String filNavn;
 bool joystickDown = false;
 
 //Start på void setup og loop------------------------------------------------------------------------------------------------------------------------
@@ -150,15 +150,14 @@ void loop() {
       }
     }
     displayMenu();
+
+    
   } else if (screenName = "Print fra SD-kort") {
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       if (listNames[marked] == "Tilbage")
         enterMenu("Hovedmenu");
       else {
-        if (listNames[marked].indexOf(".turtle") == -1)
-          printImage(listNames[marked]);
-        else
-          drawTurtle(listNames[marked]);
+        selectFile(listNames[marked]);
       }
       joystickDown = true;
     } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
@@ -172,5 +171,29 @@ void loop() {
       }
     }
     displayMenu();
+
+    
+  } else if (screenName = "Confirm") {
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      if (confirmChoice)
+        if (listNames[marked].indexOf(".turtle") == -1)
+          printImage(listNames[marked]);
+        else
+          drawTurtle(listNames[marked]);
+      else {
+        enterMenu("Hovedmenu");
+      }
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    unsigned long startTime = millis();
+    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        confirmChoice = !confirmChoice;
+        break;
+      }
+    }
+    displayConfirm();
   }
 }
