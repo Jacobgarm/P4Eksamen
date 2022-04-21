@@ -16,6 +16,8 @@ void resetPos() {
         digitalWrite(yStepPin, LOW);
       delay(700);
   }
+  penXPos = 0;
+  penYPos = 0;
 }
 
 void penUp() {
@@ -100,7 +102,7 @@ void moveDir(const float len, float dir) {
   moveCoords(xLen, yLen);
 }
 
-void drawTurtle(const char* filePath) {
+void drawTurtle(const String filePath) {
 
   //Læs filen
   File file = SD.open(filePath);
@@ -197,7 +199,7 @@ void drawTurtle(const char* filePath) {
   file.close();
 }
 
-void printImage(const char* filePath) {
+void printImage(const String filePath) {
   // Læs filen med billedet
   File file = SD.open(filePath);
 
@@ -384,4 +386,28 @@ void displayConfirm(bool valg) {
 
 void displayProgress(float progress) {
   
+}
+
+void setNamesToMain() {
+  for (int i = 0; i < 100; i++)
+    listNames [i] = mainMenuNames[i];
+}
+
+void enterMenu(String menuName) {
+  screenName = menuName;
+  if (menuName == "Print fra SD-kort") {
+    File root = SD.open("/");
+    listNames[0] = "Tilbage";
+    for (int i = 1; i < 99; i++) {
+      File file = root.openNextFile();
+      if (!file)
+        continue;
+      listNames[i] = file.name();
+    }
+    marked = 0;
+    
+  } else if (menuName == "Hovedmenu") {
+    for (int i = 0; i < 100; i++)
+      listNames [i] = mainMenuNames[i];
+  }
 }

@@ -51,6 +51,7 @@
 #define joystickXMid 2048
 #define joystickYMid 2048
 #define joystickDeadzone 360000
+#define joystickMoveInterval 300
 
 //Pins for chip select
 #define tftCSPin 15
@@ -62,14 +63,15 @@ Servo myservo;
 //State vars
 String screenName = "Hovedmenu";
 String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
-String listNames[100] = mainMenuNames;
+String listNames[100] = {};
 int marked = 0;
 
 String selectedFile;
-double penXPos;
-double penYPos;
-bool penIsDown;
+float penXPos;
+float penYPos;
+bool penIsDown = false;
 String filNavn;
+bool joystickDown = false;
 
 //Start på void setup og loop------------------------------------------------------------------------------------------------------------------------
 void setup() {
@@ -123,10 +125,52 @@ void setup() {
     return;
   }
 
-  drawTurtle("/test.turtle");
-  displayMenu();
+  
+  setNamesToMain();
+  //resetPos();
+  //displayMenu();
+  //drawTurtle("/test.turtle");
+  joystickControl();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
+  if (screenName == "Hovedmenu"){
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      enterMenu(listNames[marked]);
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    unsigned long startTime = millis();
+    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        break;
+      }
+    }
+    displayMenu();
+  } else if (screenName = "Print fra SD-kort") {
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      if (listNames[marked] == "Tilbage")
+        enterMenu("Hovedmenu");
+      else {
+        if (listNames[marked].indexOf(".turtle") == -1)
+          printImage(listNames[marked]);
+        else
+          drawTurtle(listNames[marked]);
+      }
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    unsigned long startTime = millis();
+    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        break;
+      }
+    }
+    displayMenu();
+  }
 }
