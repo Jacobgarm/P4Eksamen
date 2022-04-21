@@ -57,6 +57,8 @@ void moveCoords(const float xLen, const float yLen) {
   // Den samlede mængde tid er bestemt af den akse der skal flytte sig længest
   const int totalTime = max(xSteps, ySteps) * 1400;
   
+  // Intervallet mellem hver skift af STEP-signalet beregnes ud fra den totale tid delt med antallet af skridt
+  // Denne metode sikrer at det bliver en lige linje.
   const unsigned long xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
   const unsigned long yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
   Serial.print(xInterval);
@@ -80,6 +82,7 @@ void moveCoords(const float xLen, const float yLen) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
       xTimer = micros();
+      //Kun hele steps tælles, så antallet af resterende steps sænkes kun hvis pinnen går fra LOW til HIGH
       if (xState == HIGH)
         xRemaining--;
     }
@@ -106,6 +109,7 @@ void moveDir(const float len, float dir) {
   //Lav dir til radianer
   dir = dir * PI / 180;
   
+  //Distancer beregnes som kateter i en retvinklet trekant
   float xLen = len * cos(dir);
   float yLen = len * sin(dir);
 
