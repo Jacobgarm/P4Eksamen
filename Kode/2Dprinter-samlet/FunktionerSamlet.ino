@@ -46,18 +46,22 @@ void moveCoords(const float xLen, const float yLen) {
   digitalWrite(yDirPin, yLen > 0 ? yPosDir : !yPosDir);
 
   // Beregn antal steps der skal tages
-  const int xSteps = (int)(abs(xLen) * stepsPerMM);
-  const int ySteps = (int)(abs(yLen) * stepsPerMM);
+  const int xSteps = int(abs(xLen) * stepsPerMM);
+  const int ySteps = int(abs(yLen) * stepsPerMM);
   
   int xRemaining = xSteps;
   int yRemaining = ySteps;
-
+  Serial.print(xSteps);
+  Serial.print(' ');
+  Serial.print(ySteps);
   // Den samlede mængde tid er bestemt af den akse der skal flytte sig længest
   const int totalTime = max(xSteps, ySteps) * 1400;
   
-  const int xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
-  const int yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
-  
+  const unsigned long xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
+  const unsigned long yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
+  Serial.print(xInterval);
+  Serial.print(' ');
+  Serial.print(yInterval);
   unsigned long xTimer = 0;
   unsigned long yTimer = 0;
   
@@ -67,12 +71,15 @@ void moveCoords(const float xLen, const float yLen) {
   digitalWrite(yStepPin,yState);
 
   // Loop indtil begge akser ikke mangler flere steps
-  while (xRemaining || yRemaining) {
+  while (xRemaining != 0 || yRemaining != 0) {
+    Serial.print(xState);
+    Serial.print(' ');
+    Serial.print(yRemaining);
     // Hvis der er steps tilbage på en akse, og den forløbne tid er over intervallet, skiftes STEP-pinnens tilstand.
     if (xRemaining && micros() > xTimer + xInterval) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
-      yTimer = micros();
+      xTimer = micros();
       if (xState == HIGH)
         xRemaining--;
     }
@@ -86,6 +93,9 @@ void moveCoords(const float xLen, const float yLen) {
   }
   penXPos += xLen;
   penYPos += yLen;
+  Serial.print(xSteps);
+  Serial.print(' ');
+  Serial.print(ySteps);
 }
 
 void goToCoords(int x, int y) {
@@ -121,13 +131,16 @@ void drawTurtle(const String filePath) {
     
     //Læs filen en char ad gangen
     char c = file.read();
+    Serial.print(c);
 
     //Hvis char er et linjeskift, så er kommandoen færdig og skal udføres
     if (c == '\n') {
       // Tom linje
+      Serial.println(command);
+      Serial.println(value);
+      Serial.println(readingCommand);
       if (command == "")
         continue;
-
       command.toLowerCase();
       float v;
       if (value == "")
@@ -182,11 +195,11 @@ void drawTurtle(const String filePath) {
       continue;
 
     // Et mellemrum adskiller kommandoen og værdien
-    else if (c == ' ')
+    else if (c == 10)
       readingCommand = false;
 
     // Et hashtag indikerer starten af en kommentar
-    else if (c == '#')
+    else if (c == 35)
       isComment = true;
 
     // Ellers, tilføj charen til enten den nuværende kommando eller værdi
@@ -257,7 +270,7 @@ void joystickControl() {
     int jx = analogRead(joystickXPin) - joystickXMid;
     int jy = analogRead(joystickYPin) - joystickYMid;
     int jz = digitalRead(joystickZPin);
-
+    Serial.println(jy);
     //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)

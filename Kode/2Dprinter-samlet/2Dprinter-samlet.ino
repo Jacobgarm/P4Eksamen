@@ -27,11 +27,11 @@
 #define yPosDir HIGH
 
 //Pins for steppermotors
-#define xStepPin 26
-#define xDirPin 25
+#define xStepPin 33
+#define xDirPin 26
 
-#define yStepPin 14
-#define yDirPin 27
+#define yStepPin 27
+#define yDirPin 14
 
 //Pins for servo motor
 #define servoPin 12
@@ -43,13 +43,13 @@
 #define yFrontStopPin 34
 
 //Pins for joystick
-#define joystickXPin 33
+#define joystickXPin 25
 #define joystickYPin 32
 #define joystickZPin 35
 
 //Joystick parameters
-#define joystickXMid 2048
-#define joystickYMid 2048
+#define joystickXMid 2700
+#define joystickYMid 2660
 #define joystickDeadzone 360000
 #define joystickMoveInterval 300
 
@@ -68,8 +68,8 @@ int marked = 0;
 String selectedFile;
 bool confirmChoice = true;
 
-float penXPos;
-float penYPos;
+float penXPos = 0;
+float penYPos = 0;
 bool penIsDown = false;
 bool joystickDown = false;
 
@@ -120,15 +120,18 @@ void setup() {
   TJpgDec.setCallback(tft_output);
 
   //Start SD-kortet
-  if (!SD.begin()) {
+  if (!SD.begin(sdCSPin)) {
     Serial.println("Card Mount Failed");
-    return;
+    //return;
   }
 
-  
+  Serial.println(2);
   setNamesToMain();
   //resetPos();
   //displayMenu();
+  //moveCoords(50,50);
+  //penUp();
+  //penDown();
   //drawTurtle("/test.turtle");
   joystickControl();
 }

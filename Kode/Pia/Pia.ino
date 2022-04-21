@@ -37,7 +37,7 @@ void setup() {
   Serial.begin(9600);
   pinMode(33, INPUT_PULLUP);
   pinMode(32, INPUT_PULLUP);
-   pinMode(35, INPUT_PULLUP);
+   pinMode(35, INPUT);
   pinMode(25, OUTPUT);
   pinMode(26, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -85,8 +85,8 @@ void loop() {
     digitalWrite(LED_BUILTIN,HIGH);
   }
   //delayMicroseconds((int)(1000/abs(spd)));
-
-  if (digitalRead(35) == LOW) {
+  Serial.println(digitalRead(35));
+  if (digitalRead(35) == HIGH) {
   ned(0, 100);
 
   op(180, 100);  
