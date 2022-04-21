@@ -5,10 +5,10 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   pinMode(33, INPUT_PULLUP);
-  pinMode(32, INPUT_PULL);
+  pinMode(32, INPUT_PULLUP);
   pinMode(25, OUTPUT);
   pinMode(26, OUTPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(1, OUTPUT);
   pinMode(27, OUTPUT);
   pinMode(14, OUTPUT);
 }
