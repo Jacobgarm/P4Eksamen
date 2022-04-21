@@ -2,6 +2,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <FS.h>
+#include <LITTLEFS.h>
 #include <TJpg_Decoder.h>
 #include <ESP32Servo.h>
 #include "dejavuserif.h"
@@ -101,7 +102,7 @@ void setup() {
   tft.init();
   tft.fillScreen(TFT_BLACK);
   tft.setRotation(2);
-  tft.setSwapBytes(true)
+  tft.setSwapBytes(true);
 
   //Setup til JPG bibliotek
   TJpgDec.setJpgScale(1);
