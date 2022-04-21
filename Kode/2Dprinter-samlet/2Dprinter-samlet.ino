@@ -134,18 +134,22 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Loops handling er afhængig af hvilken skærm der vises lige nu.
   if (screenName == "Hovedmenu"){
+
+    //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       enterMenu(listNames[marked]);
       joystickDown = true;
     } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
       joystickDown = false;
 
+    //Hvis koysticket holdes nede i lang tid skal den markerede ændres
     unsigned long startTime = millis();
     while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
       if (millis() > startTime + joystickMoveInterval){
         marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        marked = marked % 5;
         break;
       }
     }
