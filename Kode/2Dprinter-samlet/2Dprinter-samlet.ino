@@ -3,6 +3,7 @@
 #include <SD.h>
 #include <FS.h>
 #include <JPEGDecoder.h>
+#include <ESP32Servo.h>
 #include "dejavuserif.h"
 #include "dejavuserifbold.h"
 
