@@ -298,8 +298,8 @@ void joystickControl() {
     }
 
     //Beregn stepintervallet ud fra joystickets position, jo større værdi jo mindre interval
-    int xInterval = (int)(-0.341796875 * abs(jx) + 1400);
-    int yInterval = (int)(-0.341796875 * abs(jy) + 1400);
+    int xInterval = -0.341796875 * abs(jx) + 1400;
+    int yInterval = -0.341796875 * abs(jy) + 1400;
 
     // Hvis den forløbne tid er større end intervallet, step
     if (micros() > xTimer + xInterval) {
