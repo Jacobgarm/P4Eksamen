@@ -10,15 +10,19 @@ GND - TFT GND, Joy GND
 19  - SD MISO
 23  - TFT & SD MOSI (SDI)
 
+0   - Alarm x-
+16  - Alarm x+
+13  - Alarm y-
+34  - Alarm y+
 
-25  - xDir
-26  - xStep
+26  - xDir
+33  - xStep
 
-27  - yDir
-14  - yStep
+14  - yDir
+27  - yStep
 
 32  - VRY
-33  - VRX
+25  - VRX
 35  - SW (joystick Z)
 
 12  - PWM til Servo

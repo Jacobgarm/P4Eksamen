@@ -1,16 +1,19 @@
+# Koden starter her
 move 40
 left 90
 move 30
 right 90
 move 20
 
-# Comment, for loop
+# Nedenstående kode kører seks gange
 repeat 6
 left 140
 move 10
 wait 50
 endrepeat
 
+# Tomme linjer, samt linjer der starter med # ignoreres
 
 setdir 0
 move 10
+# Koden slutter her

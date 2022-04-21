@@ -2,7 +2,9 @@
 #include <SPI.h>
 #include <SD.h>
 #include <FS.h>
-#include <JPEGDecoder.h>
+#include <LITTLEFS.h>
+#include <TJpg_Decoder.h>
+#include <ESP32Servo.h>
 #include "dejavuserif.h"
 #include "dejavuserifbold.h"
 
@@ -25,408 +27,52 @@
 #define yPosDir HIGH
 
 //Pins for steppermotors
-#define xStepPin 26
-#define xDirPin 25
+#define xStepPin 33
+#define xDirPin 26
 
-#define yStepPin 14
-#define yDirPin 27
+#define yStepPin 27
+#define yDirPin 14
 
 //Pins for servo motor
-#define servoPin 34
+#define servoPin 12
 
 //Pins for stopping buttons
-#define xBackStopPin 30
-#define yBackStopPin 31
-#define xFrontStopPin 30
-#define yFrontStopPin 31
+#define xBackStopPin 0
+#define yBackStopPin 13
+#define xFrontStopPin 16
+#define yFrontStopPin 34
 
 //Pins for joystick
-#define joystickXPin 33
-#define joystickYPin 33
+#define joystickXPin 25
+#define joystickYPin 32
 #define joystickZPin 35
 
 //Joystick parameters
-#define joystickXMid 2048
-#define joystickYMid 2048
+#define joystickXMid 2700
+#define joystickYMid 2660
 #define joystickDeadzone 360000
+#define joystickMoveInterval 300
 
 //Pins for chip select
 #define tftCSPin 15
 #define sdCSPin 5
 
 TFT_eSPI tft = TFT_eSPI();
+Servo myservo;
 
 //State vars
 String screenName = "Hovedmenu";
 String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
-String listNames[100] = mainMenuNames;
+String listNames[100] = {};
 int marked = 0;
-
 String selectedFile;
-double penXPos;
-double penYPos;
-bool penIsDown;
-String filNavn;
+bool confirmChoice = true;
 
+float penXPos = 0;
+float penYPos = 0;
+bool penIsDown = false;
+bool joystickDown = false;
 
-//Start på funktioner------------------------------------------------------------------------------------------------------------------------
-
-//Printer movement functions
-
-void resetPos() {
-  penUp();  
-}
-
-void penUp() {
-  if (penIsDown) {
-    // Move pen up
-    penIsDown = false;
-  }
-}
-
-void penDown() {
-  if (!penIsDown) {
-    // Move pen down
-    penIsDown = true;
-  }
-}
-
-void calibratePen() {}
-
-void moveCoords(const float xLen, const float yLen) {
-  if (xLen == 0 && yLen == 0)
-    return;
-  // Set DIR-pins alt efter om det er positiv eller negativ retning
-  digitalWrite(xDirPin, xLen > 0 ? xPosDir : !xPosDir);
-  digitalWrite(yDirPin, yLen > 0 ? yPosDir : !yPosDir);
-
-  // Beregn antal steps der skal tages
-  const int xSteps = (int)(abs(xLen) * stepsPerMM);
-  const int ySteps = (int)(abs(yLen) * stepsPerMM);
-  
-  int xRemaining = xSteps;
-  int yRemaining = ySteps;
-
-  // Den samlede mængde tid er bestemt af den akse der skal flytte sig længest
-  const int totalTime = max(xSteps, ySteps) * 1400;
-  
-  const int xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
-  const int yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
-  
-  unsigned long xTimer = 0;
-  unsigned long yTimer = 0;
-  
-  int xState = HIGH;
-  int yState = HIGH;
-  digitalWrite(xStepPin,xState);
-  digitalWrite(yStepPin,yState);
-
-  // Loop indtil begge akser ikke mangler flere steps
-  while (xRemaining || yRemaining) {
-    // Hvis der er steps tilbage på en akse, og den forløbne tid er over intervallet, skiftes STEP-pinnens tilstand.
-    if (xRemaining && micros() > xTimer + xInterval) {
-      xState = !xState;
-      digitalWrite(xStepPin,xState);
-      yTimer = micros();
-      if (xState == HIGH)
-        xRemaining--;
-    }
-    if (yRemaining && micros() > yTimer + yInterval) {
-      yState = !yState;
-      digitalWrite(yStepPin,yState);
-      yTimer = micros();
-      if (yState == HIGH)
-        yRemaining--;
-    }
-  }
-  penXPos += xLen;
-  penYPos += yLen;
-}
-
-void goToCoords(int x, int y) {
-  moveCoords(x - penXPos, y - penYPos);  
-}
-
-void moveDir(const float len, float dir) {
-  //Lav dir til radianer
-  dir = dir * PI / 180;
-  
-  float xLen = len * cos(dir);
-  float yLen = len * sin(dir);
-
-  moveCoords(xLen, yLen);
-}
-
-void drawTurtle(const char* filePath) {
-
-  //Læs filen
-  File file = SD.open(filePath);
-
-  //Command indeholder den første del af linjen, der bestemmer hvilken funktion der skal udføres
-  // Value er den tilhørende værdi.
-  String command = "";
-  String value = "";
-  bool readingCommand = true;
-  bool isComment = false;
-  float heading = 0;
-
-  unsigned long loopPos = 0;
-  int loopCount = 0;
-  while (file.available()) {
-    
-    //Læs filen en char ad gangen
-    char c = file.read();
-
-    //Hvis char er et linjeskift, så er kommandoen færdig og skal udføres
-    if (c == '\n') {
-      // Tom linje
-      if (command == "")
-        continue;
-
-      command.toLowerCase();
-      float v;
-      if (value == "")
-        v = 0;
-      else
-        v = value.toFloat();
-
-      // move kommando flytter turtle fremad efter dens nuværende retning
-      if (command == "move")
-        moveDir(v, heading);
-
-      // Drej turtle
-      else if(command == "left")
-        heading += v;
-      else if (command == "right")
-        heading -= v;
-      else if (command == "setdir")
-        heading = v;
-
-      // Vent i v millisekunder
-      else if(command == "wait")
-        delay(v);
-
-      // Flyt pennen op eller ned
-      else if(command == "pendown")
-        penDown();
-      else if(command == "penup")
-        penUp();
-
-      // Start et loop der gentager efterfølgende kode v gange
-      else if(command == "repeat") {
-        loopPos = file.position();  
-        loopCount = v;
-      } 
-
-      // Slut loopet. Hvis det ikke er udført v gange, så hop tilbage til starten af loopet
-      else if (command == "endrepeat") {
-        if (loopCount > 0) {
-          loopCount--;
-          file.seek(loopPos);  
-        }
-      }
-      else
-        Serial.println("Unknown command: " + command);
-      command = "";
-      value = "";
-      readingCommand = true;
-      isComment = false;
-    } 
-    // Hvis den nuværende linje er en kommentar, fortsæt
-    else if (isComment)
-      continue;
-
-    // Et mellemrum adskiller kommandoen og værdien
-    else if (c == ' ')
-      readingCommand = false;
-
-    // Et hashtag indikerer starten af en kommentar
-    else if (c == '#')
-      isComment = true;
-
-    // Ellers, tilføj charen til enten den nuværende kommando eller værdi
-    else if (readingCommand)
-      command = command + String(c);
-    else
-      value = value + String(c);
-    
-  }
-  file.close();
-}
-
-void printImage(const char* filePath) {
-  // Læs filen med billedet
-  File file = SD.open(filePath);
-
-  // De første to bytes indeholder antallet af kolonner og rækker
-  int cols = file.read();
-  int rows = file.read();
-  int len = cols*rows;
-
-  // Et array til pixels fyldes med resten af filens bytes
-  int img[len];
-  for (int i = 0; i< len; i++)
-    img[i] = (int)file.read();
-  file.close();
-
-  // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
-  for (int i = 0; i < rows; i++) {
-
-    // Ved hver anden række går den baglæns for at minimere distancen.
-    bool even = i % 2 == 0;
-    for(int j = even ? 0 : cols - 1; even ? (j < cols) : (j>=0) ; even ? (j++) : (j--)) {
-      goToCoords(j*printDotDistance,i*printDotDistance);
-      if (img[i*cols + j]) {
-        Serial.print("□");
-        penDown();
-        penUp();
-      } else {
-        Serial.print("■");
-      }
-    }
-    Serial.println();
-  }
-}
-
-void joystickControl() {
-  int pz = 0;
-  int xDir = xPosDir;
-  int yDir = yPosDir;
-  digitalWrite(xDirPin, xDir);
-  digitalWrite(yDirPin, yDir);
-  
-  // Start begge timere ved nul
-  unsigned long xTimer = 0;
-  unsigned long yTimer = 0;
-
-  // Start begge STEP-pins på HIGH
-  int xState = HIGH;
-  int yState = HIGH;
-  digitalWrite(xStepPin,xState);
-  digitalWrite(yStepPin,yState);
-  
-  while (true) {
-    //Læs joystickværdier
-    int jx = analogRead(joystickXPin) - joystickXMid;
-    int jy = analogRead(joystickYPin) - joystickYMid;
-    int jz = digitalRead(joystickZPin);
-
-    //Hvis joysticket er blevet trykket ned, toggle pennen
-    if (jz != pz && jz == HIGH) {
-      if (penIsDown)
-        penUp();
-      else
-        penDown();  
-    }
-
-    // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
-    if ((jx * jx + jy * jy) < joystickDeadzone)
-      continue;
-
-    // Hvis joysticket har ændret retning, skal steppermotoren vende
-    if ((jx < 0 && xDir == xPosDir) || (jx > 0 && xDir != xPosDir)) {
-      xDir = !xDir;
-      digitalWrite(xDirPin, xDir);
-    }
-    if ((jy < 0 && yDir == yPosDir) || (jy > 0 && yDir != yPosDir)) {
-      yDir = !yDir;
-      digitalWrite(yDirPin, yDir);
-    }
-
-    //Beregn stepintervallet ud fra joystickets position, jo større værdi jo mindre interval
-    int xInterval = (int)(-0.341796875 * abs(jx) + 1400);
-    int yInterval = (int)(-0.341796875 * abs(jy) + 1400);
-
-    // Hvis den forløbne tid er større end intervallet, step
-    if (micros() > xTimer + xInterval) {
-      xState = !xState;
-      digitalWrite(xStepPin,xState);
-      yTimer = micros();
-    }
-    if (micros() > yTimer + yInterval) {
-      yState = !yState;
-      digitalWrite(yStepPin,yState);
-      yTimer = micros();
-    }
-  }
-}
-
-// Funktioner til at tegne de forskelige skærme
-
-void displayMenu() {
-  //Laver hele skærmen sort
-  tft.fillScreen(TFT_BLACK);
-
-  //De næste par linjer laver topdelen af displayet, hvor den skriver tiltelen
-  tft.setTextColor(TFT_BLACK, TFT_ORANGE);
-  tft.setFreeFont(&DejaVu_Serif_16);
-  tft.fillRect(0, 0, 320, 30, TFT_ORANGE);
-  tft.fillRect(0, 30, 320, 5, TFT_BLACK);
-  tft.drawString(screenName, 21, 5);
-
-  //Sætter teksten tilbage til normalt
-  tft.setTextColor(TFT_WHITE, TFT_BLACK);
-
-  int first = 0;
-  if (marked > 9)
-    first = marked - 9;
-  
-  //Laver et loop, som kører alle mulige valg igennem
-  for (int i = 0; listNames[i+first] != ""; i++) {
-    //Starter med at finde ud af hvor henne den skal tegne på skærmen
-    int I = i * 35 + 35;
-
-    //Laver et rektankel over teksten
-    tft.fillRect(0, I, 320, 10, TFT_ORANGE);
-
-    //Ændre fonten afhængig af om det er den marked, eller ikke er. HIvs det er så bliver den fed
-    tft.setFreeFont(i+first == marked ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
-
-    //Hvis det også er den markedet, så lavers der også en cirkel ud foran
-    if (marked == i+first) {
-      tft.fillCircle(10, I + 18, 3, TFT_WHITE);
-    }
-    //Skriver nu hvad valgmuligheden hedder
-    tft.drawString(String(i+first+1) + (i+first+1 < 10 ? " " : "") + listNames[i+first], 21, I + 11);
-
-    //Dette loop kører igennem til at der ikke er flere valgmuligheder i arrayet
-  }  
-}
-
-void displayConfirm(bool valg) {
-  //Laver hele skærmen sort
-  tft.fillScreen(TFT_BLACK);
-
-  //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
-  tft.setTextColor(TFT_BLACK, TFT_ORANGE);
-  tft.setFreeFont(&DejaVu_Serif_16);
-  tft.fillRect(0, 0, 320, 60, TFT_ORANGE);
-  tft.drawString("Vil du forsaette med at printe:", 10, 5);
-  tft.drawString(filNavn, 10, 21);
-
-
-  //Laver firekanten til true
-  tft.fillRect(60, 80, 200, 50, TFT_ORANGE);
-  //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
-  tft.drawString("Ja",150,95);
-
-  //Laver firekanten til false
-  tft.fillRect(60, 180, 200, 50, TFT_ORANGE);
-  //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(valg == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
-  tft.drawString("Nej",150,195);
-  
-
-  //LAVER MINION HER
-
-
-  
-}
-
-void displayProgress(float progress) {
-  
-}
 //Start på void setup og loop------------------------------------------------------------------------------------------------------------------------
 void setup() {
 
@@ -451,6 +97,14 @@ void setup() {
   pinMode(sdCSPin,OUTPUT);
   
 
+  // Allow allocation of all timers
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+  myservo.setPeriodHertz(50);    // standard 50 hz servo
+  myservo.attach(servoPin, 1000, 2000); // attaches the servo on pin servoPin to the servo object
+  
   // Begge CS pins HIGH så de ikke begge kan kommunikeres med
   digitalWrite(tftCSPin, HIGH);
   digitalWrite(sdCSPin, HIGH);
@@ -459,17 +113,94 @@ void setup() {
   tft.init();
   tft.fillScreen(TFT_BLACK);
   tft.setRotation(2);
+  tft.setSwapBytes(true);
+
+  //Setup til JPG bibliotek
+  TJpgDec.setJpgScale(1);
+  TJpgDec.setCallback(tft_output);
 
   //Start SD-kortet
-  if (!SD.begin()) {
+  if (!SD.begin(sdCSPin)) {
     Serial.println("Card Mount Failed");
-    return;
+    //return;
   }
 
-  drawTurtle("/test.turtle");
-  displayMenu();
+  Serial.println(2);
+  setNamesToMain();
+  //resetPos();
+  //displayMenu();
+  //moveCoords(50,50);
+  //penUp();
+  //penDown();
+  //drawTurtle("/test.turtle");
+  joystickControl();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  // Loops handling er afhængig af hvilken skærm der vises lige nu.
+  if (screenName == "Hovedmenu"){
+
+    //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      enterMenu(listNames[marked]);
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    //Hvis koysticket holdes nede i lang tid skal den markerede ændres
+    unsigned long startTime = millis();
+    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        marked = marked % 5;
+        break;
+      }
+    }
+    displayMenu();
+
+    
+  } else if (screenName = "Print fra SD-kort") {
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      if (listNames[marked] == "Tilbage")
+        enterMenu("Hovedmenu");
+      else {
+        selectFile(listNames[marked]);
+      }
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    unsigned long startTime = millis();
+    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        break;
+      }
+    }
+    displayMenu();
+
+    
+  } else if (screenName = "Confirm") {
+    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
+      if (confirmChoice)
+        if (listNames[marked].indexOf(".turtle") == -1)
+          printImage(listNames[marked]);
+        else
+          drawTurtle(listNames[marked]);
+      else {
+        enterMenu("Hovedmenu");
+      }
+      joystickDown = true;
+    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      joystickDown = false;
+
+    unsigned long startTime = millis();
+    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) == 4095) {
+      if (millis() > startTime + joystickMoveInterval){
+        confirmChoice = !confirmChoice;
+        break;
+      }
+    }
+    displayConfirm();
+  }
 }
