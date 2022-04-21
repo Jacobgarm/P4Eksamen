@@ -1,7 +1,21 @@
 //Printer movement functions
 
 void resetPos() {
-  resetPosition;  
+  penUp();
+  digitalWrite(xDirPin, !xPosDir);
+  digitalWrite(yDirPin, !yPosDir);
+  while (!digitalRead(xBackStopPin) && !digitalRead(yBackStopPin)) {
+      if (!digitalRead(xBackStopPin))
+        digitalWrite(xStepPin, HIGH);
+      if (!digitalRead(yBackStopPin))
+        digitalWrite(yStepPin, HIGH);
+      delay(700);
+      if (!digitalRead(xBackStopPin))
+        digitalWrite(xStepPin, LOW);
+      if (!digitalRead(yBackStopPin))
+        digitalWrite(yStepPin, LOW);
+      delay(700);
+  }
 }
 
 void penUp() {
@@ -281,6 +295,21 @@ void joystickControl() {
 }
 
 // Funktioner til at tegne de forskelige skærme
+
+bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
+{
+   // Stop further decoding as image is running off bottom of screen
+  if ( y >= tft.height() ) return 0;
+
+  // This function will clip the image block rendering automatically at the TFT boundaries
+  tft.pushImage(x, y, w, h, bitmap);
+
+  // This might work instead if you adapt the sketch to use the Adafruit_GFX library
+  // tft.drawRGBBitmap(x, y, bitmap, w, h);
+
+  // Return 1 to decode next block
+  return 1;
+}
 
 void displayMenu() {
   //Laver hele skærmen sort

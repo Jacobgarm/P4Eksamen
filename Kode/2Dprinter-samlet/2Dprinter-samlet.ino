@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <FS.h>
-#include <JPEGDecoder.h>
+#include <TJpg_Decoder.h>
 #include <ESP32Servo.h>
 #include "dejavuserif.h"
 #include "dejavuserifbold.h"
@@ -101,6 +101,11 @@ void setup() {
   tft.init();
   tft.fillScreen(TFT_BLACK);
   tft.setRotation(2);
+  tft.setSwapBytes(true)
+
+  //Setup til JPG bibliotek
+  TJpgDec.setJpgScale(1);
+  TJpgDec.setCallback(tft_output);
 
   //Start SD-kortet
   if (!SD.begin()) {
