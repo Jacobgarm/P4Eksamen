@@ -34,17 +34,17 @@
 #define yDirPin 27
 
 //Pins for servo motor
-#define servoPin 34
+#define servoPin 12
 
 //Pins for stopping buttons
-#define xBackStopPin 30
-#define yBackStopPin 31
-#define xFrontStopPin 30
-#define yFrontStopPin 31
+#define xBackStopPin 0
+#define yBackStopPin 13
+#define xFrontStopPin 16
+#define yFrontStopPin 34
 
 //Pins for joystick
 #define joystickXPin 33
-#define joystickYPin 33
+#define joystickYPin 32
 #define joystickZPin 35
 
 //Joystick parameters
@@ -57,6 +57,7 @@
 #define sdCSPin 5
 
 TFT_eSPI tft = TFT_eSPI();
+Servo myservo;
 
 //State vars
 String screenName = "Hovedmenu";
@@ -94,6 +95,14 @@ void setup() {
   pinMode(sdCSPin,OUTPUT);
   
 
+  // Allow allocation of all timers
+  ESP32PWM::allocateTimer(0);
+  ESP32PWM::allocateTimer(1);
+  ESP32PWM::allocateTimer(2);
+  ESP32PWM::allocateTimer(3);
+  myservo.setPeriodHertz(50);    // standard 50 hz servo
+  myservo.attach(servoPin, 1000, 2000); // attaches the servo on pin servoPin to the servo object
+  
   // Begge CS pins HIGH så de ikke begge kan kommunikeres med
   digitalWrite(tftCSPin, HIGH);
   digitalWrite(sdCSPin, HIGH);

@@ -10,6 +10,10 @@ GND - TFT GND, Joy GND
 19  - SD MISO
 23  - TFT & SD MOSI (SDI)
 
+0   - Alarm x-
+16  - Alarm x+
+13  - Alarm y-
+34  - Alarm y+
 
 25  - xDir
 26  - xStep

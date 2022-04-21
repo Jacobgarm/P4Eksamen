@@ -1,4 +1,3 @@
-Servo myservo;
 
 //Hastighed mellem 90 og 180
 void op(int hastighed, int tid) {
