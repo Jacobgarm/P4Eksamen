@@ -24,7 +24,7 @@
 
 //Dirs for steppermotor
 #define xPosDir HIGH
-#define yPosDir HIGH
+#define yPosDir LOW
 
 //Pins for steppermotors
 #define xStepPin 33
@@ -37,7 +37,7 @@
 #define servoPin 12
 
 //Pins for stopping buttons
-#define xBackStopPin 0
+#define xBackStopPin 17
 #define yBackStopPin 13
 #define xFrontStopPin 16
 #define yFrontStopPin 34
@@ -48,8 +48,8 @@
 #define joystickZPin 35
 
 //Joystick parameters
-#define joystickXMid 2700
-#define joystickYMid 2660
+#define joystickXMid 2048
+#define joystickYMid 2048
 #define joystickDeadzone 360000
 #define joystickMoveInterval 300
 
@@ -132,11 +132,19 @@ void setup() {
   //moveCoords(50,50);
   //penUp();
   //penDown();
-  //drawTurtle("/test.turtle");
-  joystickControl();
+  drawTurtle("/test.turtle");
+  //joystickControl();
 }
 
 void loop() {
+  //Serial.print(digitalRead(xBackStopPin));
+  //Serial.print(" ");
+  //Serial.print(digitalRead(xFrontStopPin));
+  //Serial.print(" ");
+  //Serial.print(digitalRead(yBackStopPin));
+  //Serial.print(" ");
+  //Serial.println(digitalRead(yFrontStopPin));
+  return;
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
   if (screenName == "Hovedmenu"){
 

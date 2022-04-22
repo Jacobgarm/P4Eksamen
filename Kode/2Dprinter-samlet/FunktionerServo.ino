@@ -3,8 +3,9 @@
 void op(int hastighed, int tid) {
   if (hastighed >= 90 && hastighed <= 180) {
     myservo.write(hastighed);
-    Serial.println("Op");
+    //Serial.println("Op");
     delay(tid);
+     myservo.write(90);
   }
 }
 
@@ -12,8 +13,9 @@ void op(int hastighed, int tid) {
 void ned(int hastighed, int tid) {
   if (hastighed >= 0 && hastighed <= 90) {
     myservo.write(hastighed);
-    Serial.println("Ned");
+    //Serial.println("Ned");
     delay(tid);
+     myservo.write(90);
   }
 
 }

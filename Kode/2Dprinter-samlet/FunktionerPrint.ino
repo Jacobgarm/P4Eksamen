@@ -52,18 +52,24 @@ void drawTurtle(const String filePath) {
   while (file.available()) {
     
     //Læs filen en char ad gangen
-    char c = file.read();
-    Serial.print(c);
+    String c = "";
+    c += (char)file.read();
+    //Serial.print(c);
 
     //Hvis char er et linjeskift, så er kommandoen færdig og skal udføres
-    if (c == '\n') {
+    if (c == "\r") {}
+    else if (c == "\n") {
       // Tom linje
       Serial.println(command);
-      Serial.println(value);
-      Serial.println(readingCommand);
-      if (command == "")
+      //Serial.println(value);
+      //Serial.println(readingCommand);
+      if (command == "") {
+        readingCommand = true;
+        isComment = false;
         continue;
+      }
       command.toLowerCase();
+      command.remove(0,1);
       float v;
       if (value == "")
         v = 0;
@@ -111,24 +117,24 @@ void drawTurtle(const String filePath) {
       value = "";
       readingCommand = true;
       isComment = false;
-    } 
+    }
     // Hvis den nuværende linje er en kommentar, fortsæt
-    else if (isComment)
+    if (isComment)
       continue;
 
     // Et mellemrum adskiller kommandoen og værdien
-    else if (c == 10)
+    else if (c == " ")
       readingCommand = false;
 
     // Et hashtag indikerer starten af en kommentar
-    else if (c == 35)
+    else if (c == "#")
       isComment = true;
 
     // Ellers, tilføj charen til enten den nuværende kommando eller værdi
     else if (readingCommand)
-      command = command + String(c);
+      command = command + c;
     else
-      value = value + String(c);
+      value = value + c;
     
   }
   file.close();
@@ -156,14 +162,17 @@ void joystickControl() {
     int jx = analogRead(joystickXPin) - joystickXMid;
     int jy = analogRead(joystickYPin) - joystickYMid;
     int jz = digitalRead(joystickZPin);
-    Serial.println(jy);
+    Serial.print(jx);
+    Serial.print(" ");
+    Serial.println(jz);
     //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)
         penUp();
       else
-        penDown();  
+        penDown();
     }
+    pz = jz;
 
     // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
     if ((jx * jx + jy * jy) < joystickDeadzone)
@@ -184,12 +193,12 @@ void joystickControl() {
     int yInterval = -0.341796875 * abs(jy) + 1400;
 
     // Hvis den forløbne tid er større end intervallet, step
-    if (micros() > xTimer + xInterval) {
+    if (micros() > xTimer + xInterval && abs(jx) > 200) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
-      yTimer = micros();
+      xTimer = micros();
     }
-    if (micros() > yTimer + yInterval) {
+    if (micros() > yTimer + yInterval && abs(jy) > 200) {
       yState = !yState;
       digitalWrite(yStepPin,yState);
       yTimer = micros();
