@@ -161,8 +161,10 @@ void enterMenu(String menuName) {
     tft.drawString("Du printer med joystick ",60,80);
     delay(1000);
     joystickControl();
+    displayMenu();
+    delay(1000);
     marked=3;
-    screenName="Hovedmenu";
+    screenName="Print med joystick";
     displayMenu();
 
     

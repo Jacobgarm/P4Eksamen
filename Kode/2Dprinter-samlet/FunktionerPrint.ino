@@ -185,8 +185,9 @@ void joystickControl() {
           TimerJz=0;
       return;
       }
+      
     }
-
+    TimerJz=0;
     // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
     if ((jx * jx + jy * jy) < joystickDeadzone)
       continue;

@@ -154,24 +154,15 @@ void loop() {
   //Serial.print(" ");
   //Serial.println(digitalRead(yFrontStopPin));
 
-
+  
   
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
   if (screenName == "Hovedmenu"){
 
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
-      while(joystickZPin==HIGH){
-          timerZPin++;
-          Serial.println(analogRead(joystickYPin));
-          if(timerZPin==300){
-            timerZPin=0;
             joystickDown = true;
             enterMenu(mainMenuNames[2]);
-          }
-          delay(1);
-        }
-     timerZPin=0;
     } else if (digitalRead(joystickZPin) == LOW && joystickDown)
       joystickDown = false;
 
@@ -179,12 +170,25 @@ void loop() {
     unsigned long startTime = millis();
     while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) > 4000) {
       if (millis() > startTime + joystickMoveInterval){
-        //marked += analogRead(joystickYPin) == 0 ? 1 : -1;
+
         if(marked>=1){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              marked+=1;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              marked+=-1;
+              }
+        }else if(marked==0){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              marked+=1;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              marked+=-1;
+        }}
+        
+        /*if(marked>=1){
         marked += analogRead(joystickYPin) == 0 ? 1 : -1;
         }else if(marked==0){
           marked += analogRead(joystickYPin) == 0 ? 1 : 0;
-        }
+        }*/
         //marked = marked % 3;
         displayMenu();
         break;
@@ -245,8 +249,8 @@ void loop() {
     }
     displayConfirm();
     //---------------------------------------------------------------------------------------------------------------------------------------
-  } else if (screenName= "Print med joystick"){
-    Serial.println("her");
+  } /*else if (screenName= "Print med joystick"){
+    Serial.println("her123");
     tft.setFreeFont(&DejaVu_Serif_Bold_16);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString("Du printer med joystick ",60,80);
@@ -256,7 +260,7 @@ void loop() {
     screenName="Hovedmenu";
     displayMenu();
      
-  }
+  }*/
   
 
 }
