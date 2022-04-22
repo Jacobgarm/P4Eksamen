@@ -1,20 +1,24 @@
 //Printer movement functions
 
 void resetPos() {
+  displayProgress(0);
   penUp();
   digitalWrite(xDirPin, !xPosDir);
   digitalWrite(yDirPin, !yPosDir);
-  while (!digitalRead(xBackStopPin) && !digitalRead(yBackStopPin)) {
+  while (!digitalRead(xBackStopPin) || !digitalRead(yBackStopPin)) {
       if (!digitalRead(xBackStopPin))
         digitalWrite(xStepPin, HIGH);
       if (!digitalRead(yBackStopPin))
         digitalWrite(yStepPin, HIGH);
-      delay(700);
+        
+      delayMicroseconds(700);
+      
       if (!digitalRead(xBackStopPin))
         digitalWrite(xStepPin, LOW);
       if (!digitalRead(yBackStopPin))
         digitalWrite(yStepPin, LOW);
-      delay(700);
+        
+      delayMicroseconds(700);
   }
   penXPos = 0;
   penYPos = 0;
@@ -127,6 +131,7 @@ void setNamesToMain() {
 }
 
 void enterMenu(String menuName) {
+  Serial.println("her4");
   screenName = menuName;
   if (menuName == "Print fra SD-kort") {
     //Hvis denne valgmulighed er valgt, hentes listen over filer på SD-kortet, som sættes til listen over valgmuligheder
@@ -144,8 +149,26 @@ void enterMenu(String menuName) {
   } else if (menuName == "Hovedmenu") {
     setNamesToMain();
     
+  } else if (menuName=="Printer til start"){
+    Serial.println("her3");
+  screenName="Printer til start";
+  marked=0;
+  } else if (menuName=="Print med joystick"){
+    Serial.println("her");
+    tft.fillScreen(TFT_BLACK);
+    tft.setFreeFont(&DejaVu_Serif_Bold_16);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("Du printer med joystick ",60,80);
+    delay(1000);
+    joystickControl();
+    marked=3;
+    screenName="Hovedmenu";
+    displayMenu();
+
+    
+  screenName="Print med joystick";
+  marked=2;
   }
-  marked = 0;
 }
 
 void selectFile(String fileName) {

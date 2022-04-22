@@ -7,6 +7,8 @@
 #include <ESP32Servo.h>
 #include "dejavuserif.h"
 #include "dejavuserifbold.h"
+#include "SPIFFS.h"
+#define FS_NO_GLOBALS
 
 #define sgn(x) ((x) < 0 ? -1 : ((x) > 0 ? 1 : 0))
 
@@ -48,8 +50,8 @@
 #define joystickZPin 35
 
 //Joystick parameters
-#define joystickXMid 2048
-#define joystickYMid 2048
+#define joystickXMid 2048 //Hvis det er med batterri så 2048, med pc 1348
+#define joystickYMid 2048 //Hvis det er med batterri så 2048, med pc 1348
 #define joystickDeadzone 360000
 #define joystickMoveInterval 300
 
@@ -62,11 +64,17 @@ Servo myservo;
 
 //State vars
 String screenName = "Hovedmenu";
-String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
+String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick"};
 String listNames[100] = {};
 int marked = 0;
 String selectedFile;
 bool confirmChoice = true;
+int prikNummer=1;
+
+int procentLoad=0;
+int TimerJz=0;
+int timerZPin=0;
+
 
 float penXPos = 0;
 float penYPos = 0;
@@ -90,9 +98,9 @@ void setup() {
   pinMode(yBackStopPin,INPUT);
   pinMode(xFrontStopPin,INPUT);
   pinMode(yFrontStopPin,INPUT);
-  pinMode(joystickXPin, INPUT_PULLUP);
-  pinMode(joystickYPin, INPUT_PULLUP);
-  pinMode(joystickZPin, INPUT_PULLUP);
+  pinMode(joystickXPin, INPUT);
+  pinMode(joystickYPin, INPUT);
+  pinMode(joystickZPin, INPUT);
   pinMode(tftCSPin,OUTPUT);
   pinMode(sdCSPin,OUTPUT);
   
@@ -132,8 +140,9 @@ void setup() {
   //moveCoords(50,50);
   //penUp();
   //penDown();
-  drawTurtle("/test.turtle");
+  //drawTurtle("/test.turtle");
   //joystickControl();
+  displayMenu();
 }
 
 void loop() {
@@ -144,29 +153,51 @@ void loop() {
   //Serial.print(digitalRead(yBackStopPin));
   //Serial.print(" ");
   //Serial.println(digitalRead(yFrontStopPin));
-  return;
+
+
+  
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
   if (screenName == "Hovedmenu"){
 
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
-    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
-      enterMenu(listNames[marked]);
-      joystickDown = true;
-    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+    if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
+      while(joystickZPin==HIGH){
+          timerZPin++;
+          Serial.println(analogRead(joystickYPin));
+          if(timerZPin==300){
+            timerZPin=0;
+            joystickDown = true;
+            enterMenu(mainMenuNames[2]);
+          }
+          delay(1);
+        }
+     timerZPin=0;
+    } else if (digitalRead(joystickZPin) == LOW && joystickDown)
       joystickDown = false;
 
     //Hvis koysticket holdes nede i lang tid skal den markerede ændres
     unsigned long startTime = millis();
-    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
+    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) > 4000) {
       if (millis() > startTime + joystickMoveInterval){
-        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
-        marked = marked % 5;
+        //marked += analogRead(joystickYPin) == 0 ? 1 : -1;
+        if(marked>=1){
+        marked += analogRead(joystickYPin) == 0 ? 1 : -1;
+        }else if(marked==0){
+          marked += analogRead(joystickYPin) == 0 ? 1 : 0;
+        }
+        //marked = marked % 3;
+        displayMenu();
         break;
       }
     }
+//---------------------------------------------------------------------------------------------------------------------------------------
+  } else if (screenName= "Printer til start"){
+    resetPos();
+    marked=0;
+    screenName="Hovedmenu";
+    procentLoad=0;
     displayMenu();
-
-    
+//---------------------------------------------------------------------------------------------------------------------------------------
   } else if (screenName = "Print fra SD-kort") {
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       if (listNames[marked] == "Tilbage")
@@ -181,13 +212,16 @@ void loop() {
     unsigned long startTime = millis();
     while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
       if (millis() > startTime + joystickMoveInterval){
+        if(marked>=1){
         marked += analogRead(joystickXPin) == 0 ? -1 : 1;
+        }else if(marked==0){
+          marked += analogRead(joystickXPin) == 0 ? 0 : 1;
+        }
         break;
       }
     }
-    displayMenu();
-
-    
+    displayMenu();   
+    //---------------------------------------------------------------------------------------------------------------------------------------
   } else if (screenName = "Confirm") {
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       if (confirmChoice)
@@ -210,5 +244,19 @@ void loop() {
       }
     }
     displayConfirm();
+    //---------------------------------------------------------------------------------------------------------------------------------------
+  } else if (screenName= "Print med joystick"){
+    Serial.println("her");
+    tft.setFreeFont(&DejaVu_Serif_Bold_16);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString("Du printer med joystick ",60,80);
+    delay(1000);
+    joystickControl();
+    marked=3;
+    screenName="Hovedmenu";
+    displayMenu();
+     
   }
+  
+
 }

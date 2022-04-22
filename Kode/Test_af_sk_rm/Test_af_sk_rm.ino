@@ -1,19 +1,14 @@
-// Funktioner til at tegne de forskelige skærme
+#include <TFT_eSPI.h>
+#include <SPI.h>
+#include "dejavuserif.h"
+#include "dejavuserifbold.h"
 
-bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
-{
-   // Stop further decoding as image is running off bottom of screen
-  if (y >= tft.height()) return 0;
+TFT_eSPI tft=TFT_eSPI();
 
-  // This function will clip the image block rendering automatically at the TFT boundaries
-  tft.pushImage(x, y, w, h, bitmap);
-
-  // This might work instead if you adapt the sketch to use the Adafruit_GFX library
-  // tft.drawRGBBitmap(x, y, bitmap, w, h);
-
-  // Return 1 to decode next block
-  return 1;
-}
+String screenName = "Hovedmenu";
+String mainMenuNames[100] = {"Printer til start", "Print fra SD-kort", "Print med joystick", "Kalibrer og reset"};
+String listNames[100] = mainMenuNames;
+int marked = 0;
 
 void displayMenu() {
   //Laver hele skærmen sort
@@ -55,28 +50,28 @@ void displayMenu() {
   }  
 }
 
-void displayConfirm() {
+void displayConfirm(bool valg) {
   //Laver hele skærmen sort
-  //tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(TFT_BLACK);
 
   //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
   tft.setTextColor(TFT_BLACK, TFT_ORANGE);
   tft.setFreeFont(&DejaVu_Serif_16);
   tft.fillRect(0, 0, 320, 60, TFT_ORANGE);
   tft.drawString("Vil du forsaette med at printe:", 10, 5);
-  tft.drawString(selectedFile, 10, 21);
+  tft.drawString("filNavn", 10, 21);
 
 
   //Laver firekanten til true
   tft.fillRect(60, 80, 200, 50, TFT_ORANGE);
   //Skriver "ja" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(confirmChoice == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
+  tft.setFreeFont(valg == true ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Ja",150,95);
 
   //Laver firekanten til false
   tft.fillRect(60, 180, 200, 50, TFT_ORANGE);
   //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
-  tft.setFreeFont(confirmChoice == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
+  tft.setFreeFont(valg == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Nej",150,195);
   
 
@@ -86,7 +81,11 @@ void displayConfirm() {
   
 }
 
-void displayProgress(float progress) {
+
+int prikNummer=1;
+int procentLoad=0;
+
+void displayLoading() {
   //Laver hele skærmen sort
   tft.fillScreen(TFT_BLACK);
 
@@ -98,28 +97,46 @@ void displayProgress(float progress) {
   //hvor den kører på et switch som den bare køre igennem igen og igen
   switch(prikNummer){
     case 1:
-    tft.drawString("Printer . "+String(progress)+"%",60,80);
+    tft.drawString("Printer . "+String(procentLoad)+"%",60,80);
     prikNummer++;
-    TJpgDec.drawSdJpg(50,200,"/Minion1.jpg");
     break;
     case 2:
-    tft.drawString("Printer .. "+String(progress)+"%",60,80);
+    tft.drawString("Printer .. "+String(procentLoad)+"%",60,80);
     prikNummer++;
-    TJpgDec.drawSdJpg(50,200,"/Minion2.jpg");
     break;
     case 3:
-    tft.drawString("Printer ... "+String(progress)+"%",60,80);
+    tft.drawString("Printer ... "+String(procentLoad)+"%",60,80);
     prikNummer=1;
-    TJpgDec.drawSdJpg(50,200,"/Minion3.jpg");
     break;
     }
 
   //Laver en firekant, som ikke er indfyldt
   tft.drawRect(61,100,202,20,TFT_WHITE);
   //Laver nu en firekant som fylder den anden firekant op ligeså stille, afhængig af dens procent
-  tft.fillRect(60,100,progress*2,20,TFT_WHITE);
+  tft.fillRect(60,100,procentLoad*2,20,TFT_WHITE);
   
   
   //LAVER MINION HER
+
+
   
+}
+
+void setup() {
+  tft.setRotation(2);
+  // put your setup code here, to run once:
+  tft.init();
+  tft.fillScreen(TFT_RED);
+  //displayMenu();
+  Serial.begin(115200);
+
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  Serial.println("k");
+  displayLoading();
+  procentLoad++;
+  delay(1000);
+
 }

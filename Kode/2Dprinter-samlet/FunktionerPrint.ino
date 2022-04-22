@@ -141,6 +141,7 @@ void drawTurtle(const String filePath) {
 }
 
 void joystickControl() {
+  delay(1);
   int pz = 0;
   int xDir = xPosDir;
   int yDir = yPosDir;
@@ -162,9 +163,9 @@ void joystickControl() {
     int jx = analogRead(joystickXPin) - joystickXMid;
     int jy = analogRead(joystickYPin) - joystickYMid;
     int jz = digitalRead(joystickZPin);
-    Serial.print(jx);
+    /*Serial.print(jx);
     Serial.print(" ");
-    Serial.println(jz);
+    Serial.println(jz);*/
     //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)
@@ -173,6 +174,18 @@ void joystickControl() {
         penDown();
     }
     pz = jz;
+    while(digitalRead(joystickZPin) == HIGH){
+      delay(10);
+      TimerJz++;
+      Serial.println(TimerJz);
+      if(TimerJz>100){
+        if (penIsDown){
+          penUp();
+          }
+          TimerJz=0;
+      return;
+      }
+    }
 
     // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
     if ((jx * jx + jy * jy) < joystickDeadzone)
