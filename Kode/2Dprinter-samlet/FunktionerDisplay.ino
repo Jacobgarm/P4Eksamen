@@ -57,7 +57,7 @@ void displayMenu() {
 
 void displayConfirm() {
   //Laver hele skærmen sort
-  //tft.fillScreen(TFT_BLACK);
+  tft.fillScreen(TFT_BLACK);
 
   //De næste par linjer laver topdelen af displayet, hvor den skriver om man vil forsætte
   tft.setTextColor(TFT_BLACK, TFT_ORANGE);
