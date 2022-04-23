@@ -78,12 +78,7 @@ void displayConfirm() {
   //Skriver "nej" i fed af hængig om man har valgt den, starter med at ændre fonten
   tft.setFreeFont(confirmChoice == false ? &DejaVu_Serif_Bold_16 : &DejaVu_Serif_16);
   tft.drawString("Nej",150,195);
-  
 
-  //LAVER MINION HER
-
-
-  
 }
 
 void displayProgress(float progress) {
@@ -118,8 +113,4 @@ void displayProgress(float progress) {
   tft.drawRect(61,100,202,20,TFT_WHITE);
   //Laver nu en firekant som fylder den anden firekant op ligeså stille, afhængig af dens procent
   tft.fillRect(60,100,progress*2,20,TFT_WHITE);
-  
-  
-  //LAVER MINION HER
-  
 }
