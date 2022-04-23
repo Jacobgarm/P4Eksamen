@@ -163,9 +163,17 @@ void joystickControl() {
     int jx = analogRead(joystickXPin) - joystickXMid;
     int jy = analogRead(joystickYPin) - joystickYMid;
     int jz = digitalRead(joystickZPin);
-    /*Serial.print(jx);
-    Serial.print(" ");
-    Serial.println(jz);*/
+
+    //Tilpas til intervaller
+    if (jx > 0)
+      jx = map(jx, 0, 4096 - joystickXMid, 0, 1000);
+    else
+      jx = map(jx, -joystickXMid, 0, -1000, 0);
+    if (jy > 0)
+      jy = map(jy, 0, 4096 - joystickYMid, 0, 1000);
+    else
+      jy = map(jy, -joystickYMid, 0, -1000, 0);
+      
     //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)
@@ -203,16 +211,16 @@ void joystickControl() {
     }
 
     //Beregn stepintervallet ud fra joystickets position, jo større værdi jo mindre interval
-    int xInterval = -0.341796875 * abs(jx) + 1400;
-    int yInterval = -0.341796875 * abs(jy) + 1400;
+    int xInterval = -1.8 * abs(jx) + 2500;
+    int yInterval = -1.8 * abs(jy) + 2500;
 
     // Hvis den forløbne tid er større end intervallet, step
-    if (micros() > xTimer + xInterval && abs(jx) > 200) {
+    if (micros() > xTimer + xInterval && abs(jx) > 60) {
       xState = !xState;
       digitalWrite(xStepPin,xState);
       xTimer = micros();
     }
-    if (micros() > yTimer + yInterval && abs(jy) > 200) {
+    if (micros() > yTimer + yInterval && abs(jy) > 60) {
       yState = !yState;
       digitalWrite(yStepPin,yState);
       yTimer = micros();

@@ -52,7 +52,7 @@
 //Joystick parameters
 #define joystickXMid 2048 //Hvis det er med batterri så 2048, med pc 1348
 #define joystickYMid 2048 //Hvis det er med batterri så 2048, med pc 1348
-#define joystickDeadzone 360000
+#define joystickDeadzone 90000
 #define joystickMoveInterval 300
 
 //Pins for chip select
