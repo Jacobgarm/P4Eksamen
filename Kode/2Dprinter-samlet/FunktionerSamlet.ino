@@ -55,19 +55,15 @@ void moveCoords(const float xLen, const float yLen) {
   
   int xRemaining = xSteps;
   int yRemaining = ySteps;
-  Serial.print(xSteps);
-  Serial.print(' ');
-  Serial.print(ySteps);
+  
   // Den samlede mængde tid er bestemt af den akse der skal flytte sig længest
-  const int totalTime = max(xSteps, ySteps) * 1400;
+  const int totalTime = max(xSteps, ySteps) * 2000;
   
   // Intervallet mellem hver skift af STEP-signalet beregnes ud fra den totale tid delt med antallet af skridt
   // Denne metode sikrer at det bliver en lige linje.
   const unsigned long xInterval = xSteps == 0 ? 0 : totalTime / xSteps / 2;
   const unsigned long yInterval = ySteps == 0 ? 0 : totalTime / ySteps / 2;
-  Serial.print(xInterval);
-  Serial.print(' ');
-  Serial.print(yInterval);
+
   unsigned long xTimer = 0;
   unsigned long yTimer = 0;
   
@@ -78,9 +74,6 @@ void moveCoords(const float xLen, const float yLen) {
 
   // Loop indtil begge akser ikke mangler flere steps
   while (xRemaining != 0 || yRemaining != 0) {
-    Serial.print(xState);
-    Serial.print(' ');
-    Serial.print(yRemaining);
     // Hvis der er steps tilbage på en akse, og den forløbne tid er over intervallet, skiftes STEP-pinnens tilstand.
     if (xRemaining && micros() > xTimer + xInterval) {
       xState = !xState;
@@ -100,9 +93,6 @@ void moveCoords(const float xLen, const float yLen) {
   }
   penXPos += xLen;
   penYPos += yLen;
-  Serial.print(xSteps);
-  Serial.print(' ');
-  Serial.print(ySteps);
 }
 
 void goToCoords(int x, int y) {

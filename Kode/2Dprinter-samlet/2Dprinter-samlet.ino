@@ -142,14 +142,17 @@ void setup() {
   //penDown();
   //drawTurtle("/test2.turtle");
   //joystickControl();
-  //char* img = 
   //printImage("/bytes.bwb");
   //displayMenu();
 }
 
 void loop() {
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
-  if (screenName == "Hovedmenu"){
+  Serial.println(3);
+  //displayConfirm();
+  tft.fillScreen(TFT_BLACK);
+  Serial.println(5);
+  /*if (screenName == "Hovedmenu"){
 
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
@@ -248,6 +251,6 @@ void loop() {
     displayMenu();
      
   }*/
-  
+  delay(1000);
 
 }

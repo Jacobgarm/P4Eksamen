@@ -20,22 +20,18 @@ void printImage(const char* filePath) {
   penUp();
   // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
   for (int i = 0; i < rows; i++) {
-    Serial.println(i);
     // Ved hver anden række går den baglæns for at minimere distancen.
     bool even = i % 2 == 0;
     for (int j = even ? 0 : cols - 1; even ? (j < cols) : (j >= 0) ; even ? (j++) : (j--)) {
       //displayProgress(int(float(printed)/len * 100));
       goToCoords(j * printDotDistance, i * printDotDistance);
+      delay(20);
       if (img[i * cols + j] < 50) {
-        Serial.print("■");
         penDown();
         penUp();
-      } else {
-        Serial.print("□");
       }
       printed++;
     }
-    Serial.println();
   }
 }
 
