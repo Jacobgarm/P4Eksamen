@@ -151,7 +151,6 @@ void loop() {
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
   
   if (screenName == "Hovedmenu"){
-    Serial.println(screenName+" hej");
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
             joystickDown = true;
@@ -184,41 +183,16 @@ void loop() {
     }
 //---------------------------------------------------------------------------------------------------------------------------------------
   } else if (screenName = "Print fra SD-kort") {
-    /*Serial.println(screenName+" hej4");
-    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
-      if (listNames[marked] == "Tilbage")
-        enterMenu("Hovedmenu");
-      else {
-        selectFile(listNames[marked]);
-      }
-      joystickDown = true;
-    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
-      joystickDown = false;
-
-    unsigned long startTime = millis();
-    while (analogRead(joystickXPin) == 0 || analogRead(joystickXPin) == 4095) {
-      if (millis() > startTime + joystickMoveInterval){
-        if(marked>=1){
-        marked += analogRead(joystickXPin) == 0 ? -1 : 1;
-        }else if(marked==0){
-          marked += analogRead(joystickXPin) == 0 ? 0 : 1;
-        }
-        break;
-      }
-    }*/
-
-      //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
+         //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
             joystickDown = true;
             if (listNames[marked] == "Tilbage")
         enterMenu("Hovedmenu");
       else {
-        //printImage("/bytes.bwb");
         if (listNames[marked].indexOf(".turtle") == -1)
            printImage((char*)(listNames[marked].c_str()));
         else
            drawTurtle((char*)(listNames[marked].c_str()));
-        //selectFile(listNames[marked]);
         return;
       }           
     } else if (digitalRead(joystickZPin) == LOW && joystickDown)
@@ -247,7 +221,9 @@ void loop() {
       }
     }
   } else if(screenName=="Confirm"){
-    Serial.println("JEGEHRE");
+    
+    //Denne kode under er mening at skulle lave en confirm skærm, men det kom ikke til at virke
+    /*Serial.println("JEGEHRE");
     //screenName="Confirm";
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
@@ -284,7 +260,7 @@ void loop() {
         displayConfirm();
         break;
       }
-    }
+    }*/
    }
 
 }
