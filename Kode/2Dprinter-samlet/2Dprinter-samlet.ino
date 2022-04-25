@@ -143,21 +143,19 @@ void setup() {
   //drawTurtle("/test2.turtle");
   //joystickControl();
   //printImage("/bytes.bwb");
-  //displayMenu();
+  displayMenu();
+
 }
 
 void loop() {
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
-  Serial.println(3);
-  //displayConfirm();
-  tft.fillScreen(TFT_BLACK);
-  Serial.println(5);
-  /*if (screenName == "Hovedmenu"){
-
+  
+  if (screenName == "Hovedmenu"){
+    Serial.println(screenName+" hej");
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
             joystickDown = true;
-            enterMenu(mainMenuNames[2]);
+            enterMenu(listNames[marked]);
     } else if (digitalRead(joystickZPin) == LOW && joystickDown)
       joystickDown = false;
 
@@ -185,14 +183,8 @@ void loop() {
       }
     }
 //---------------------------------------------------------------------------------------------------------------------------------------
-  } else if (screenName= "Printer til start"){
-    resetPos();
-    marked=0;
-    screenName="Hovedmenu";
-    procentLoad=0;
-    displayMenu();
-//---------------------------------------------------------------------------------------------------------------------------------------
   } else if (screenName = "Print fra SD-kort") {
+    /*Serial.println(screenName+" hej4");
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       if (listNames[marked] == "Tilbage")
         enterMenu("Hovedmenu");
@@ -213,44 +205,83 @@ void loop() {
         }
         break;
       }
-    }
-    displayMenu();   
-    //---------------------------------------------------------------------------------------------------------------------------------------
-  } else if (screenName = "Confirm") {
-    if (digitalRead(joystickZPin) == LOW && !joystickDown) {
-      if (confirmChoice)
-        if (listNames[marked].indexOf(".turtle") == -1)
-          printImage((char*)(listNames[marked].c_str()));
-        else
-          drawTurtle((char*)(listNames[marked].c_str()));
-      else {
+    }*/
+
+      //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
+    if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
+            joystickDown = true;
+            if (listNames[marked] == "Tilbage")
         enterMenu("Hovedmenu");
-      }
-      joystickDown = true;
-    } else if (digitalRead(joystickZPin) == HIGH && joystickDown)
+      else {
+        printImage("/bytes.bwb");
+        printImage((char*)(listNames[marked].c_str()));
+        selectFile(listNames[marked]);
+        return;
+      }           
+    } else if (digitalRead(joystickZPin) == LOW && joystickDown)
       joystickDown = false;
 
+    //Hvis koysticket holdes nede i lang tid skal den markerede ændres
     unsigned long startTime = millis();
-    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) == 4095) {
+    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) > 4000) {
       if (millis() > startTime + joystickMoveInterval){
-        confirmChoice = !confirmChoice;
+
+        if(marked>=1){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              marked+=1;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              marked+=-1;
+              }
+        }else if(marked==0){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              marked+=1;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              marked+=-1;
+        }}
+        
+        displayMenu();
         break;
       }
     }
-    displayConfirm();
-    //---------------------------------------------------------------------------------------------------------------------------------------
-  } /*else if (screenName= "Print med joystick"){
-    Serial.println("her123");
-    tft.setFreeFont(&DejaVu_Serif_Bold_16);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString("Du printer med joystick ",60,80);
-    delay(1000);
-    joystickControl();
-    marked=3;
-    screenName="Hovedmenu";
-    displayMenu();
-     
-  }*/
-  delay(1000);
+  } else if(screenName=="Confirm"){
+    Serial.println("JEGEHRE");
+    //screenName="Confirm";
+    //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
+    if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
+            joystickDown = true;
+            if(confirmChoice==true && false){
+            if (listNames[marked].indexOf(".turtle") == -1)
+              printImage((char*)(listNames[marked].c_str()));
+            else
+              drawTurtle((char*)(listNames[marked].c_str()));
+            } else if(confirmChoice==false){
+              //enterMenu("Hovedmenu");
+            }
+    } else if (digitalRead(joystickZPin) == LOW && joystickDown)
+      joystickDown = false;
+
+    //Hvis joysticket holdes nede i lang tid skal den markerede ændres
+    unsigned long startTime = millis();
+    while (analogRead(joystickYPin) == 0 || analogRead(joystickYPin) > 4000) {
+      if (millis() > startTime + joystickMoveInterval){
+
+        if(confirmChoice==false){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              confirmChoice=true;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              confirmChoice=true;
+              }
+        }else if(confirmChoice==true){
+            if(analogRead(joystickYPin)==0&&digitalRead(joystickZPin) == LOW){
+              confirmChoice=false;
+            }else if(analogRead(joystickYPin) != 0&&digitalRead(joystickZPin) == LOW){
+              confirmChoice=false;
+        }}
+       
+        displayConfirm();
+        break;
+      }
+    }
+   }
 
 }
