@@ -1,17 +1,13 @@
 // Funktioner til at tegne de forskelige skærme
 
-bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap)
-{
-   // Stop further decoding as image is running off bottom of screen
+bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* bitmap) {
+   // Når y er nede ved bunden, skal afkodning stoppe
   if (y >= tft.height()) return 0;
 
-  // This function will clip the image block rendering automatically at the TFT boundaries
+  // Print bitmap-billede på skærm
   tft.pushImage(x, y, w, h, bitmap);
-
-  // This might work instead if you adapt the sketch to use the Adafruit_GFX library
-  // tft.drawRGBBitmap(x, y, bitmap, w, h);
-
-  // Return 1 to decode next block
+  
+  // Fortsæt til næste segment
   return 1;
 }
 
