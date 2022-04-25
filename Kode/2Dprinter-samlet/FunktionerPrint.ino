@@ -1,32 +1,37 @@
-void printImage(const String filePath) {
+void printImage(const char* filePath) {
   // Læs filen med billedet
+  Serial.println(filePath);
   File file = SD.open(filePath);
 
   // De første to bytes indeholder antallet af kolonner og rækker
-  int cols = file.read();
-  int rows = file.read();
-  int len = cols*rows;
-
+  Serial.println(file.available());
+  //Serial.println(file.read());
+  int cols = (int)file.read();
+  int rows = (int)file.read();
+  int len = cols * rows;
+  Serial.println(len);
   // Et array til pixels fyldes med resten af filens bytes
   int img[len];
-  for (int i = 0; i< len; i++)
+  for (int i = 0; i < len; i++)
     img[i] = (int)file.read();
   file.close();
+  Serial.println(img[10]);
   int printed = 0;
+  penUp();
   // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik
   for (int i = 0; i < rows; i++) {
-
+    Serial.println(i);
     // Ved hver anden række går den baglæns for at minimere distancen.
     bool even = i % 2 == 0;
-    for(int j = even ? 0 : cols - 1; even ? (j < cols) : (j>=0) ; even ? (j++) : (j--)) {
-      displayProgress(int(float(printed)/len * 100));
-      goToCoords(j*printDotDistance,i*printDotDistance);
-      if (img[i*cols + j]) {
-        Serial.print("□");
+    for (int j = even ? 0 : cols - 1; even ? (j < cols) : (j >= 0) ; even ? (j++) : (j--)) {
+      //displayProgress(int(float(printed)/len * 100));
+      goToCoords(j * printDotDistance, i * printDotDistance);
+      if (img[i * cols + j] < 50) {
+        Serial.print("■");
         penDown();
         penUp();
       } else {
-        Serial.print("■");
+        Serial.print("□");
       }
       printed++;
     }
@@ -34,7 +39,7 @@ void printImage(const String filePath) {
   }
 }
 
-void drawTurtle(const String filePath) {
+void drawTurtle(const char* filePath) {
 
   //Læs filen
   File file = SD.open(filePath);
@@ -50,15 +55,15 @@ void drawTurtle(const String filePath) {
   unsigned long loopPos = 0;
   int loopCount = 0;
   while (file.available()) {
-    
+
     //Læs filen en char ad gangen
     String c = "";
     c += (char)file.read();
     //Serial.print(c);
 
     //Hvis char er et linjeskift, så er kommandoen færdig og skal udføres
-    if (c == "\r") {}
-    else if (c == "\n") {
+    if (c == "\r" || c == "\n") {}
+    else if (c == ";") {
       // Tom linje
       Serial.println(command);
       //Serial.println(value);
@@ -69,7 +74,7 @@ void drawTurtle(const String filePath) {
         continue;
       }
       command.toLowerCase();
-      command.remove(0,1);
+      //command.remove(0, 1);
       float v;
       if (value == "")
         v = 0;
@@ -81,7 +86,7 @@ void drawTurtle(const String filePath) {
         moveDir(v, heading);
 
       // Drej turtle
-      else if(command == "left")
+      else if (command == "left")
         heading += v;
       else if (command == "right")
         heading -= v;
@@ -89,26 +94,26 @@ void drawTurtle(const String filePath) {
         heading = v;
 
       // Vent i v millisekunder
-      else if(command == "wait")
+      else if (command == "wait")
         delay(v);
 
       // Flyt pennen op eller ned
-      else if(command == "pendown")
+      else if (command == "pendown")
         penDown();
-      else if(command == "penup")
+      else if (command == "penup")
         penUp();
 
       // Start et loop der gentager efterfølgende kode v gange
-      else if(command == "repeat") {
-        loopPos = file.position();  
+      else if (command == "repeat") {
+        loopPos = file.position();
         loopCount = v;
-      } 
+      }
 
       // Slut loopet. Hvis det ikke er udført v gange, så hop tilbage til starten af loopet
       else if (command == "endrepeat") {
         if (loopCount > 0) {
           loopCount--;
-          file.seek(loopPos);  
+          file.seek(loopPos);
         }
       }
       else
@@ -119,7 +124,7 @@ void drawTurtle(const String filePath) {
       isComment = false;
     }
     // Hvis den nuværende linje er en kommentar, fortsæt
-    if (isComment)
+    else if (isComment)
       continue;
 
     // Et mellemrum adskiller kommandoen og værdien
@@ -135,7 +140,7 @@ void drawTurtle(const String filePath) {
       command = command + c;
     else
       value = value + c;
-    
+
   }
   file.close();
 }
@@ -147,7 +152,7 @@ void joystickControl() {
   int yDir = yPosDir;
   digitalWrite(xDirPin, xDir);
   digitalWrite(yDirPin, yDir);
-  
+
   // Start begge timere ved nul
   unsigned long xTimer = 0;
   unsigned long yTimer = 0;
@@ -155,9 +160,9 @@ void joystickControl() {
   // Start begge STEP-pins på HIGH
   int xState = HIGH;
   int yState = HIGH;
-  digitalWrite(xStepPin,xState);
-  digitalWrite(yStepPin,yState);
-  
+  digitalWrite(xStepPin, xState);
+  digitalWrite(yStepPin, yState);
+
   while (true) {
     //Læs joystickværdier
     int jx = analogRead(joystickXPin) - joystickXMid;
@@ -173,7 +178,7 @@ void joystickControl() {
       jy = map(jy, 0, 4096 - joystickYMid, 0, 1000);
     else
       jy = map(jy, -joystickYMid, 0, -1000, 0);
-      
+
     //Hvis joysticket er blevet trykket ned, toggle pennen
     if (jz != pz && jz == HIGH) {
       if (penIsDown)
@@ -182,20 +187,20 @@ void joystickControl() {
         penDown();
     }
     pz = jz;
-    while(digitalRead(joystickZPin) == HIGH){
+    while (digitalRead(joystickZPin) == HIGH) {
       delay(10);
       TimerJz++;
       Serial.println(TimerJz);
-      if(TimerJz>100){
-        if (penIsDown){
+      if (TimerJz > 100) {
+        if (penIsDown) {
           penUp();
-          }
-          TimerJz=0;
-      return;
+        }
+        TimerJz = 0;
+        return;
       }
-      
+
     }
-    TimerJz=0;
+    TimerJz = 0;
     // Hvis joysticket ikke er flyttet udenfor deadzone, gør intet
     if ((jx * jx + jy * jy) < joystickDeadzone)
       continue;
@@ -217,12 +222,12 @@ void joystickControl() {
     // Hvis den forløbne tid er større end intervallet, step
     if (micros() > xTimer + xInterval && abs(jx) > 60) {
       xState = !xState;
-      digitalWrite(xStepPin,xState);
+      digitalWrite(xStepPin, xState);
       xTimer = micros();
     }
     if (micros() > yTimer + yInterval && abs(jy) > 60) {
       yState = !yState;
-      digitalWrite(yStepPin,yState);
+      digitalWrite(yStepPin, yState);
       yTimer = micros();
     }
   }

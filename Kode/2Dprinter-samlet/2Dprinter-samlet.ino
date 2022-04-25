@@ -22,7 +22,7 @@
 
 //Size values
 #define stepsPerMM 5 //Hvor mange steps der skal til for at bevæge en millimeter
-#define printDotDistance 4 //Hvor mannge millimeter der er mellem hver prik der printes
+#define printDotDistance 5 //Hvor mannge millimeter der er mellem hver prik der printes
 
 //Dirs for steppermotor
 #define xPosDir HIGH
@@ -140,22 +140,14 @@ void setup() {
   //moveCoords(50,50);
   //penUp();
   //penDown();
-  //drawTurtle("/test.turtle");
+  //drawTurtle("/test2.turtle");
   //joystickControl();
-  displayMenu();
+  //char* img = 
+  //printImage("/bytes.bwb");
+  //displayMenu();
 }
 
 void loop() {
-  //Serial.print(digitalRead(xBackStopPin));
-  //Serial.print(" ");
-  //Serial.print(digitalRead(xFrontStopPin));
-  //Serial.print(" ");
-  //Serial.print(digitalRead(yBackStopPin));
-  //Serial.print(" ");
-  //Serial.println(digitalRead(yFrontStopPin));
-
-  
-  
   // Loops handling er afhængig af hvilken skærm der vises lige nu.
   if (screenName == "Hovedmenu"){
 
@@ -184,12 +176,7 @@ void loop() {
               marked+=-1;
         }}
         
-        /*if(marked>=1){
-        marked += analogRead(joystickYPin) == 0 ? 1 : -1;
-        }else if(marked==0){
-          marked += analogRead(joystickYPin) == 0 ? 1 : 0;
-        }*/
-        //marked = marked % 3;
+        marked = marked % 3;
         displayMenu();
         break;
       }
@@ -230,9 +217,9 @@ void loop() {
     if (digitalRead(joystickZPin) == LOW && !joystickDown) {
       if (confirmChoice)
         if (listNames[marked].indexOf(".turtle") == -1)
-          printImage(listNames[marked]);
+          printImage((char*)(listNames[marked].c_str()));
         else
-          drawTurtle(listNames[marked]);
+          drawTurtle((char*)(listNames[marked].c_str()));
       else {
         enterMenu("Hovedmenu");
       }
