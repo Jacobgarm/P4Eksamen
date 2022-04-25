@@ -213,9 +213,12 @@ void loop() {
             if (listNames[marked] == "Tilbage")
         enterMenu("Hovedmenu");
       else {
-        printImage("/bytes.bwb");
-        printImage((char*)(listNames[marked].c_str()));
-        selectFile(listNames[marked]);
+        //printImage("/bytes.bwb");
+        if (listNames[marked].indexOf(".turtle") == -1)
+           printImage((char*)(listNames[marked].c_str()));
+        else
+           drawTurtle((char*)(listNames[marked].c_str()));
+        //selectFile(listNames[marked]);
         return;
       }           
     } else if (digitalRead(joystickZPin) == LOW && joystickDown)
@@ -249,7 +252,7 @@ void loop() {
     //Hvis joysicket er trykket ned, og det ikke var før, vælges menuen
     if (digitalRead(joystickZPin) == HIGH && !joystickDown) {
             joystickDown = true;
-            if(confirmChoice==true && false){
+            if(confirmChoice==true){
             if (listNames[marked].indexOf(".turtle") == -1)
               printImage((char*)(listNames[marked].c_str()));
             else
