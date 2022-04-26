@@ -74,6 +74,11 @@ void moveCoords(const float xLen, const float yLen) {
 
   // Loop indtil begge akser ikke mangler flere steps
   while (xRemaining != 0 || yRemaining != 0) {
+    //Hvis du vil havde den til at printe langsommere, og mere præcis, så behold serial.println under
+    Serial.println(xRemaining);
+    Serial.println(xRemaining);
+    Serial.println(xRemaining);
+    
     // Hvis der er steps tilbage på en akse, og den forløbne tid er over intervallet, skiftes STEP-pinnens tilstand.
     if (xRemaining && micros() > xTimer + xInterval) {
       xState = !xState;
