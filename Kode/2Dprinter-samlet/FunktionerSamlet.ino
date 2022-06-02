@@ -136,12 +136,12 @@ void enterMenu(String menuName) {
     listNames[0] = "Tilbage";
     for (int i = 1; i < 99; i++) {
       File file = root.openNextFile();
-      //Hvis der ikke er lere filer, stoppes loopet
+      //Hvis der ikke er flere filer, stoppes loopet
       if (!file)
         break;
       listNames[i] = file.name();
-      }
-      marked=0;
+    }
+    marked=0;
     displayMenu();  
   
   } else if (menuName == "Hovedmenu") {

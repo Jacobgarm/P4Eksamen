@@ -1,21 +1,18 @@
 void printImage(const char* filePath) {
   // Læs filen med billedet
-  Serial.println(filePath);
   File file = SD.open(filePath);
 
   // De første to bytes indeholder antallet af kolonner og rækker
-  Serial.println(file.available());
-  //Serial.println(file.read());
-  int cols = (int)file.read();
-  int rows = (int)file.read();
-  int len = cols * rows;
-  Serial.println(len);
+  uint8_t cols = (uint8_t)file.read();
+  uint8_t rows = (uint8_t)file.read();
+  int len = (int)cols * (int)rows;
+  
   // Et array til pixels fyldes med resten af filens bytes
-  int img[len];
+  uint8_t img[len];
   for (int i = 0; i < len; i++)
-    img[i] = (int)file.read();
+    img[i] = (uint8_t)file.read();
   file.close();
-  Serial.println(img[10]);
+  
   int printed = 0;
   penUp();
   // For hver pixel, flyt til koordinaterne, og hvis positionen i arrayet er 1 laves en prik

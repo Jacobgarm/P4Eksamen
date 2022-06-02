@@ -130,7 +130,7 @@ void setup() {
   //Start SD-kortet
   if (!SD.begin(sdCSPin)) {
     Serial.println("Card Mount Failed");
-    //return;
+    return;
   }
 
   Serial.println(2);
